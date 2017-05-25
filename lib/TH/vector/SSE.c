@@ -4,10 +4,19 @@
 #include <intrin.h>
 #endif
 
+#ifdef _OPENMP
+#include <omp.h>
+#define TH_OMP_OVERHEAD_THRESHOLD_VEC 10000
+#endif
+
+
 static void THDoubleVector_fill_SSE(double *x, const double c, const ptrdiff_t n) {
   ptrdiff_t i;
   ptrdiff_t off;
   __m128d XMM0 = _mm_set1_pd(c);
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-8); i+=8) {
     _mm_storeu_pd((x)+i  , XMM0);
     _mm_storeu_pd((x)+i+2, XMM0);
@@ -22,8 +31,12 @@ static void THDoubleVector_fill_SSE(double *x, const double c, const ptrdiff_t n
 
 static void THDoubleVector_cadd_SSE(double *z, const double *x, const double *y, const double c, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
   __m128d XMM7 = _mm_set1_pd(c);
   __m128d XMM0, XMM2;
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-2); i+=2) {
     XMM0 = _mm_loadu_pd((x)+i);
     XMM2 = _mm_loadu_pd((y)+i);
@@ -31,16 +44,21 @@ static void THDoubleVector_cadd_SSE(double *z, const double *x, const double *y,
     XMM2 = _mm_add_pd(XMM0, XMM2);
     _mm_storeu_pd((z)+i, XMM2);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%2);
+  for (i=off; i<(n); i++) {
     z[i] = x[i] + c * y[i];
   }
 }
 
 static void THDoubleVector_adds_SSE(double *y, const double *x, const double c, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
   __m128d XMM7 = _mm_set1_pd(c);
-  __m128d XMM0, XMM2;
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-4); i+=4) {
+    __m128d XMM0, XMM2;
     XMM0 = _mm_loadu_pd((x)+i);
     XMM2 = _mm_loadu_pd((x)+i+2);
     XMM0 = _mm_add_pd(XMM0, XMM7);
@@ -48,13 +66,18 @@ static void THDoubleVector_adds_SSE(double *y, const double *x, const double c, 
     _mm_storeu_pd((y)+i, XMM0);
     _mm_storeu_pd((y)+i+2, XMM2);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%4);
+  for (i=off; i<(n); i++) {
     y[i] = x[i] + c;
   }
 }
 
 static void THDoubleVector_cmul_SSE(double *z, const double *x, const double *y, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-8); i+=8) {
     __m128d XMM0 = _mm_loadu_pd((x)+i  );
     __m128d XMM1 = _mm_loadu_pd((x)+i+2);
@@ -73,14 +96,19 @@ static void THDoubleVector_cmul_SSE(double *z, const double *x, const double *y,
     _mm_storeu_pd((z)+i+4, XMM6);
     _mm_storeu_pd((z)+i+6, XMM7);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%8);
+  for (i=off; i<(n); i++) {
     z[i] = x[i] * y[i];
   }
 }
 
 static void THDoubleVector_muls_SSE(double *y, const double *x, const double c, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
   __m128d XMM15 = _mm_set1_pd(c);
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-8); i+=8) {
     __m128d XMM0 = _mm_loadu_pd((x)+i  );
     __m128d XMM1 = _mm_loadu_pd((x)+i+2);
@@ -95,15 +123,21 @@ static void THDoubleVector_muls_SSE(double *y, const double *x, const double c, 
     _mm_storeu_pd((y)+i+4, XMM6);
     _mm_storeu_pd((y)+i+6, XMM7);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%8);
+  for (i=off; i<(n); i++) {
     y[i] = x[i] * c;
   }
 }
 
 static void THDoubleVector_cdiv_SSE(double *z, const double *x, const double *y, const ptrdiff_t n) {
   ptrdiff_t i;
-  __m128d XMM0, XMM1, XMM2, XMM3;
+  ptrdiff_t off;
+
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-4); i+=4) {
+    __m128d XMM0, XMM1, XMM2, XMM3;
     XMM0 = _mm_loadu_pd(x+i);
     XMM1 = _mm_loadu_pd(x+i+2);
     XMM2 = _mm_loadu_pd(y+i);
@@ -113,16 +147,22 @@ static void THDoubleVector_cdiv_SSE(double *z, const double *x, const double *y,
     _mm_storeu_pd(z+i, XMM2);
     _mm_storeu_pd(z+i+2, XMM3);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%4);
+  for (i=off; i<(n); i++) {
     z[i] = x[i] / y[i];
   }
 }
 
 static void THDoubleVector_divs_SSE(double *y, const double *x, const double c, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
   __m128d XMM7 = _mm_set1_pd(c);
-  __m128d XMM0, XMM1;
+
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-4); i+=4) {
+    __m128d XMM0, XMM1;
     XMM0 = _mm_loadu_pd(x+i);
     XMM1 = _mm_loadu_pd(x+i+2);
     XMM0 = _mm_div_pd(XMM0, XMM7);
@@ -130,15 +170,20 @@ static void THDoubleVector_divs_SSE(double *y, const double *x, const double c, 
     _mm_storeu_pd(y+i, XMM0);
     _mm_storeu_pd(y+i+2, XMM1);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%4);
+  for (i=off; i<(n); i++) {
     y[i] = x[i] / c;
   }
 }
 
 static void THFloatVector_fill_SSE(float *x, const float c, const ptrdiff_t n) {
   ptrdiff_t i;
-  __m128 XMM0 = _mm_set_ps1(c);
   ptrdiff_t off;
+  __m128 XMM0 = _mm_set_ps1(c);
+
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-16); i+=16) {
     _mm_storeu_ps((x)+i  ,  XMM0);
     _mm_storeu_ps((x)+i+4,  XMM0);
@@ -154,25 +199,34 @@ static void THFloatVector_fill_SSE(float *x, const float c, const ptrdiff_t n) {
 
 static void THFloatVector_cadd_SSE(float *z, const float *x, const float *y, const float c, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
   __m128 XMM7 = _mm_set_ps1(c);
-  __m128 XMM0, XMM2;
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-4); i+=4) {
+    __m128 XMM0, XMM2;
     XMM0 = _mm_loadu_ps((x)+i);
     XMM2 = _mm_loadu_ps((y)+i);
     XMM2 = _mm_mul_ps(XMM2, XMM7);
     XMM2 = _mm_add_ps(XMM0, XMM2);
     _mm_storeu_ps((z)+i, XMM2);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%4);
+  for (i=off; i<(n); i++) {
     z[i] = x[i] + c * y[i];
   }
 }
 
 static void THFloatVector_adds_SSE(float *y, const float *x, const float c, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
   __m128 XMM7 = _mm_set1_ps(c);
-  __m128 XMM0, XMM2;
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-8); i+=8) {
+    __m128 XMM0, XMM2;
     XMM0 = _mm_loadu_ps((x)+i);
     XMM2 = _mm_loadu_ps((x)+i+4);
     XMM0 = _mm_add_ps(XMM0, XMM7);
@@ -180,13 +234,18 @@ static void THFloatVector_adds_SSE(float *y, const float *x, const float c, cons
     _mm_storeu_ps((y)+i, XMM0);
     _mm_storeu_ps((y)+i+4, XMM2);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%8);
+  for (i=off; i<(n); i++) {
     y[i] = x[i] + c;
   }
 }
 
 static void THFloatVector_cmul_SSE(float *z, const float *x, const float *y, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-16); i+=16) {
     __m128 XMM0 = _mm_loadu_ps((x)+i   );
     __m128 XMM1 = _mm_loadu_ps((x)+i+ 4);
@@ -205,14 +264,19 @@ static void THFloatVector_cmul_SSE(float *z, const float *x, const float *y, con
     _mm_storeu_ps((z)+i+ 8, XMM6);
     _mm_storeu_ps((z)+i+12, XMM7);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%16);
+  for (i=off; i<(n); i++) {
     z[i] = x[i] * y[i];
   }
 }
 
 static void THFloatVector_muls_SSE(float *y, const float *x, const float c, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
   __m128 XMM15 = _mm_set_ps1(c);
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-16); i+=16) {
     __m128 XMM0 = _mm_loadu_ps((x)+i   );
     __m128 XMM1 = _mm_loadu_ps((x)+i+ 4);
@@ -227,15 +291,20 @@ static void THFloatVector_muls_SSE(float *y, const float *x, const float c, cons
     _mm_storeu_ps((y)+i+ 8, XMM6);
     _mm_storeu_ps((y)+i+12, XMM7);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%8);
+  for (i=off; i<(n); i++) {
     y[i] = x[i] * c;
   }
 }
 
 static void THFloatVector_cdiv_SSE(float *z, const float *x, const float *y, const ptrdiff_t n) {
   ptrdiff_t i;
-  __m128 XMM0, XMM1, XMM2, XMM3;
+  ptrdiff_t off;
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-8); i+=8) {
+    __m128 XMM0, XMM1, XMM2, XMM3;
     XMM0 = _mm_loadu_ps(x+i);
     XMM1 = _mm_loadu_ps(x+i+4);
     XMM2 = _mm_loadu_ps(y+i);
@@ -245,16 +314,21 @@ static void THFloatVector_cdiv_SSE(float *z, const float *x, const float *y, con
     _mm_storeu_ps(z+i, XMM2);
     _mm_storeu_ps(z+i+4, XMM3);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%8);
+  for (i=off; i<(n); i++) {
     z[i] = x[i] / y[i];
   }
 }
 
 static void THFloatVector_divs_SSE(float *y, const float *x, const float c, const ptrdiff_t n) {
   ptrdiff_t i;
+  ptrdiff_t off;
   __m128 XMM7 = _mm_set1_ps(c);
-  __m128 XMM0, XMM1;
+#ifdef _OPENMP
+  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+#endif
   for (i=0; i<=((n)-8); i+=8) {
+    __m128 XMM0, XMM1;
     XMM0 = _mm_loadu_ps(x+i);
     XMM1 = _mm_loadu_ps(x+i+4);
     XMM0 = _mm_div_ps(XMM0, XMM7);
@@ -262,7 +336,8 @@ static void THFloatVector_divs_SSE(float *y, const float *x, const float c, cons
     _mm_storeu_ps(y+i, XMM0);
     _mm_storeu_ps(y+i+4, XMM1);
   }
-  for (; i<(n); i++) {
+  off = (n) - ((n)%8);
+  for (i=off; i<(n); i++) {
     y[i] = x[i] / c;
   }
 }
