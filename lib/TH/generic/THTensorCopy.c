@@ -4,7 +4,7 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-#define TH_OMP_OVERHEAD_THRESHOLD_COPY 10000
+#define TH_OMP_OVERHEAD_THRESHOLD_COPY 100
 #endif
 
 #define THTENSOR_MAX_DIM 100
@@ -142,21 +142,21 @@ void THTensor_(copy)(THTensor *tensor, THTensor *src)
             srcBasicIndex = 0;
             tensorBasicIndex = 0;
 
-          for(dim = 0; dim < srcDim-1; dim++) {
-            index = (iter%srcStride[dim])/srcStride[dim+1];
+            for(dim = 0; dim < srcDim-1; dim++) {
+              index = (iter%srcStride[dim])/srcStride[dim+1];
+              srcBasicIndex += index*src->stride[dim];
+            }
+            index = iter%srcStride[dim];
             srcBasicIndex += index*src->stride[dim];
-          }
-          index = iter%srcStride[dim];
-          srcBasicIndex += index*src->stride[dim];
 
-          for(dim = 0; dim < tensorDim-1; dim++) {
-            index = (iter%tensorStride[dim])/tensorStride[dim+1];
+            for(dim = 0; dim < tensorDim-1; dim++) {
+              index = (iter%tensorStride[dim])/tensorStride[dim+1];
+              tensorBasicIndex += index*tensor->stride[dim];
+            }
+            index = iter%tensorStride[dim];
             tensorBasicIndex += index*tensor->stride[dim];
-          }
-          index = iter%tensorStride[dim];
-          tensorBasicIndex += index*tensor->stride[dim];
 
-          *(rp+tensorBasicIndex) = *(tp+srcBasicIndex);
+            *(rp+tensorBasicIndex) = *(tp+srcBasicIndex);
           }
         }
       } else {

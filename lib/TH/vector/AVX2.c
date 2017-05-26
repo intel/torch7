@@ -8,7 +8,7 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-#define TH_OMP_OVERHEAD_THRESHOLD_VEC 10000
+#define TH_OMP_OVERHEAD_THRESHOLD_VEC 100
 #endif
 
 
