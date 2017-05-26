@@ -1,4 +1,6 @@
-Internal-use branch aims to accelerate the elementwise operations such as copy, cadd, adds and so on on CPU platform. There is __NO WARRANTY__. But all the test case of torch7 pass on this branch. To merge the modification to the master branch is working in process. Thanks for your concern.
+Internal-use branch aims to accelerate the elementwise operations such as copy, cadd, adds and so on on CPU platform. There is __NO WARRANTY__. But all the test case of torch7 pass on this branch. To merge the modification to the master branch is working in process. Thanks for your concern.  
+
+The related benchmark is WIP, click [here](https://github.com/MlWoo/torch7EwOPBenchmark).  
 
 [![Join the chat at https://gitter.im/torch/torch7](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/torch/torch7?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/torch/torch7.svg)](https://travis-ci.org/torch/torch7)
