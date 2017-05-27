@@ -15,7 +15,8 @@ static void THDoubleVector_fill_SSE(double *x, const double c, const ptrdiff_t n
   ptrdiff_t off;
   __m128d XMM0 = _mm_set1_pd(c);
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-8); i+=8) {
     _mm_storeu_pd((x)+i  , XMM0);
@@ -35,7 +36,8 @@ static void THDoubleVector_cadd_SSE(double *z, const double *x, const double *y,
   __m128d XMM7 = _mm_set1_pd(c);
   __m128d XMM0, XMM2;
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-2); i+=2) {
     XMM0 = _mm_loadu_pd((x)+i);
@@ -55,7 +57,8 @@ static void THDoubleVector_adds_SSE(double *y, const double *x, const double c, 
   ptrdiff_t off;
   __m128d XMM7 = _mm_set1_pd(c);
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-4); i+=4) {
     __m128d XMM0, XMM2;
@@ -76,7 +79,8 @@ static void THDoubleVector_cmul_SSE(double *z, const double *x, const double *y,
   ptrdiff_t i;
   ptrdiff_t off;
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-8); i+=8) {
     __m128d XMM0 = _mm_loadu_pd((x)+i  );
@@ -107,7 +111,8 @@ static void THDoubleVector_muls_SSE(double *y, const double *x, const double c, 
   ptrdiff_t off;
   __m128d XMM15 = _mm_set1_pd(c);
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-8); i+=8) {
     __m128d XMM0 = _mm_loadu_pd((x)+i  );
@@ -134,7 +139,8 @@ static void THDoubleVector_cdiv_SSE(double *z, const double *x, const double *y,
   ptrdiff_t off;
 
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-4); i+=4) {
     __m128d XMM0, XMM1, XMM2, XMM3;
@@ -159,7 +165,8 @@ static void THDoubleVector_divs_SSE(double *y, const double *x, const double c, 
   __m128d XMM7 = _mm_set1_pd(c);
 
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-4); i+=4) {
     __m128d XMM0, XMM1;
@@ -182,7 +189,8 @@ static void THFloatVector_fill_SSE(float *x, const float c, const ptrdiff_t n) {
   __m128 XMM0 = _mm_set_ps1(c);
 
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-16); i+=16) {
     _mm_storeu_ps((x)+i  ,  XMM0);
@@ -202,7 +210,8 @@ static void THFloatVector_cadd_SSE(float *z, const float *x, const float *y, con
   ptrdiff_t off;
   __m128 XMM7 = _mm_set_ps1(c);
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-4); i+=4) {
     __m128 XMM0, XMM2;
@@ -223,7 +232,8 @@ static void THFloatVector_adds_SSE(float *y, const float *x, const float c, cons
   ptrdiff_t off;
   __m128 XMM7 = _mm_set1_ps(c);
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-8); i+=8) {
     __m128 XMM0, XMM2;
@@ -244,7 +254,8 @@ static void THFloatVector_cmul_SSE(float *z, const float *x, const float *y, con
   ptrdiff_t i;
   ptrdiff_t off;
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-16); i+=16) {
     __m128 XMM0 = _mm_loadu_ps((x)+i   );
@@ -275,7 +286,8 @@ static void THFloatVector_muls_SSE(float *y, const float *x, const float c, cons
   ptrdiff_t off;
   __m128 XMM15 = _mm_set_ps1(c);
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-16); i+=16) {
     __m128 XMM0 = _mm_loadu_ps((x)+i   );
@@ -301,7 +313,8 @@ static void THFloatVector_cdiv_SSE(float *z, const float *x, const float *y, con
   ptrdiff_t i;
   ptrdiff_t off;
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-8); i+=8) {
     __m128 XMM0, XMM1, XMM2, XMM3;
@@ -325,7 +338,8 @@ static void THFloatVector_divs_SSE(float *y, const float *x, const float c, cons
   ptrdiff_t off;
   __m128 XMM7 = _mm_set1_ps(c);
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-8); i+=8) {
     __m128 XMM0, XMM1;

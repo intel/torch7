@@ -17,7 +17,8 @@ void THDoubleVector_cadd_AVX2(double *z, const double *x, const double *y, const
   ptrdiff_t off;
   __m256d YMM15 = _mm256_set_pd(c, c, c, c);
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-8); i+=8) {
     __m256d YMM0, YMM1, YMM2, YMM3;
@@ -41,7 +42,8 @@ void THFloatVector_cadd_AVX2(float *z, const float *x, const float *y, const flo
   ptrdiff_t off;
   __m256 YMM15 = _mm256_set_ps(c, c, c, c, c, c, c, c);
 #ifdef _OPENMP
-  #pragma omp parallel for if (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) private (i)  
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD_VEC) && ( 0 == omp_flag) )private (i) 
 #endif
   for (i=0; i<=((n)-16); i+=16) {
     __m256 YMM0, YMM1, YMM2, YMM3;
