@@ -982,7 +982,7 @@ void THTensor_(cadd)(THTensor *r_, THTensor *t, real value, THTensor *src)
       TH_TENSOR_APPLY3_CONTIG(real, r_, real, t, real, src, THVector_(cadd)(r__data, t_data, src_data, value, r__len););
     }
   } else {
-#ifdef _OPENMP
+#if 0
    if(r_ == t) {
       TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, src, r_Local[i] = srcLocal[j] + value * srcLocal[j]; , *r__data = *src_data + value * *src_data;);
     } else {
