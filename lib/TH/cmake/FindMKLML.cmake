@@ -30,10 +30,11 @@ SET(INTEL_MKLML_SEQUENTIAL OFF CACHE BOOL
 
 IF(CMAKE_COMPILER_IS_GNUCC)
   SET(mklml_lib_list
-        mklml_gnu)
+        mklml_intel iomp5 )
   SET(mklml "mklml_gnu")
-  SET(mklomp "iomp5")
 ELSE(CMAKE_COMPILER_IS_GNUCC)
+  SET(mklml_lib_list
+        mklml_intel iomp5 )
   SET(mklml "mklml_intel")
   SET(mklomp "iomp5")
 ENDIF (CMAKE_COMPILER_IS_GNUCC)
@@ -122,7 +123,7 @@ if(MKLML_ROOT_DIR)
        MARK_AS_ADVANCED(${header})
        LIST(APPEND MKLML_INCLUDE_DIR ${${header}})
     ENDFOREACH()
-message("-----------------------------------" ${MKLML_VERSION_STR} "   " ${MKLML_LIBRARIES} "  " ${mklml_lib_find_paths}  "   "  ${MKLML_INCLUDE_DIR})
+message("version----" ${MKLML_VERSION_STR} " lib  " ${MKLML_LIBRARIES} " include   "  ${MKLML_INCLUDE_DIR})
 endif()
 
 
