@@ -16,43 +16,20 @@ SET(MKLML_VERSION)
 SET(MKLML_INCLUDE_DIR)
 SET(MKLML_LIBRARIES)
 
-# Includes
-INCLUDE(CheckTypeSize)
-INCLUDE(CheckFunctionExists)
-
-# Intel Compiler Suite
-SET(INTEL_COMPILER_DIR CACHE STRING
-  "Root directory of the Intel Compiler Suite (contains ipp, mkl, etc.)")
-SET(INTEL_MKLML_DIR CACHE STRING
-  "Root directory of the Intel MKLML (standalone)")
-SET(INTEL_MKLML_SEQUENTIAL OFF CACHE BOOL
-  "Force using the sequential (non threaded) libraries")
-
-IF(CMAKE_COMPILER_IS_GNUCC)
+IF(WITH_IOMP)
   SET(mklml_lib_list
-        mklml_intel iomp5 )
-  SET(mklml "mklml_gnu")
-ELSE(CMAKE_COMPILER_IS_GNUCC)
+      mklml_intel iomp5 )
+ELSE(WITH_IOMP)
   SET(mklml_lib_list
-        mklml_intel iomp5 )
-  SET(mklml "mklml_intel")
-  SET(mklomp "iomp5")
-ENDIF (CMAKE_COMPILER_IS_GNUCC)
+      mklml_gnu )
+ENDIF(WITH_IOMP)
 
-#SET(mklml_lib_list mklml_gnu mklml_intel iomp)
 SET(mklml_header_list mkl_blas.h i_malloc.h mkl_cblas.h mkl_dnn_types.h mkl_service.h mkl_trans.h mkl_types.h mkl_version.h mkl_vml_defines.h mkl_vml_functions.h mkl_vml.h mkl_vml_types.h mkl_vsl_defines.h mkl_vsl_functions.h mkl_vsl.h mkl_vsl_types.h)
 
 
 # Paths
 SET(saved_CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH})
 SET(saved_CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH})
-IF (INTEL_MKLML_DIR)
-  # TODO: diagnostic if dir does not exist
-  SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}
-    "${INTEL_MKLML_DIR}/include")
-  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
-    "${INTEL_MKLML_DIR}/lib/${mklvers}")
-ENDIF (INTEL_MKLML_DIR)
 
 macro (mklml_find_lib VAR NAME DIRS)
     find_path(${VAR} ${NAME} ${DIRS} NO_DEFAULT_PATH)
@@ -90,7 +67,6 @@ if(NOT MKLML_ROOT_DIR OR NOT EXISTS ${MKLML_ROOT_DIR}/include/mkldnn.h OR NOT EX
     if(UNIX)
         list(APPEND mklml_root_paths "/opt/intel/mklml")
     endif()
-    message("+++++++++++" $ENV{MKLML_PATH}   "       " ${mklml_root_paths})
     find_path(MKLML_ROOT_DIR include/mkl_dnn.h include/mkl_cblas.h include/mkl_blas.h PATHS ${mklml_root_paths})
 endif()
 
@@ -103,11 +79,9 @@ if(MKLML_ROOT_DIR)
         
         set(mklml_header_find_paths
             ${MKLML_ROOT_DIR}/include ) 
-    
     else()
         message(STATUS "MKL version ${MKLML_VERSION_STR} is obsoleting")
     endif()
-    
     
     set(MKLML_LIBRARIES "")
     foreach(lib ${mklml_lib_list})
@@ -121,9 +95,19 @@ if(MKLML_ROOT_DIR)
     FOREACH(header ${mklml_header_list})
        FIND_PATH(${header} ${header} ${mklml_header_find_paths})
        MARK_AS_ADVANCED(${header})
-       LIST(APPEND MKLML_INCLUDE_DIR ${${header}})
+       IF(${header})
+         set(MKLML_INCLUDE_DIR ${${header}})
+       ELSE(${header})
+         set(MKLML_INCLUDE_DIR "")
+         message(WARNING "${header} is not found")
+         break()
+       ENDIF(${header})
     ENDFOREACH()
-message("version----" ${MKLML_VERSION_STR} " lib  " ${MKLML_LIBRARIES} " include   "  ${MKLML_INCLUDE_DIR})
+
+    message("MKLML Info")
+    message("version----" ${MKLML_VERSION_STR} )
+    message("lib----" ${MKLML_LIBRARIES} )
+    message("include----"  ${MKLML_INCLUDE_DIR})
 endif()
 
 
@@ -139,7 +123,7 @@ ENDIF (MKLML_LIBRARIES AND MKLML_INCLUDE_DIR)
 
 # Standard termination
 IF(NOT MKLML_FOUND AND MKLML_FIND_REQUIRED)
-  MESSAGE(FATAL_ERROR "MKLML library not found. Please specify library  location")
+  MESSAGE(FATAL_ERROR "MKLML library not found. Please specify library location")
 ENDIF(NOT MKLML_FOUND AND MKLML_FIND_REQUIRED)
 IF(NOT MKLML_FIND_QUIETLY)
   IF(MKLML_FOUND)
