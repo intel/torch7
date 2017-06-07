@@ -188,6 +188,24 @@ int main()
 " HAS_GCC_ATOMICS)
 ENDIF()
 
+
+set(USING_INTEL OFF)
+if (${CMAKE_C_COMPILER} MATCHES "icc.*$") 
+  message("======> ${CMAKE_C_COMPILER} --- intel c compiler is true")
+  set(USING_INTEL ON)
+endif ()
+
+if (${CMAKE_CXX_COMPILER} MATCHES "icpc.*$") 
+  message("======> ${CMAKE_CXX_COMPILER} --- intel cxx compiler is true")
+  set(USING_INTEL ON)
+endif ()
+
+if (USING_INTEL AND (NOT MSVC))
+  message("======>   intel compiler is true")
+  set(C_AVX_FLAGS_ "-mavx"  )
+  set(C_AVX2_FLAGS_ "-march=core-avx2"  )
+endif ()
+
 #######################################################################
 ##### sources section
 ######################################################################
@@ -215,7 +233,7 @@ IF(C_AVX_FOUND)
     SET_SOURCE_FILES_PROPERTIES(vector/AVX.c PROPERTIES COMPILE_FLAGS "/Ox /arch:AVX ${C_AVX_FLAGS}")
   ELSE(MSVC)
     SET_SOURCE_FILES_PROPERTIES(generic/simd/convolve5x5_avx.c PROPERTIES COMPILE_FLAGS "-O3 -ffast-math ${C_AVX_FLAGS}")
-    SET_SOURCE_FILES_PROPERTIES(vector/AVX.c PROPERTIES COMPILE_FLAGS "-O3 ${C_AVX_FLAGS}")
+    SET_SOURCE_FILES_PROPERTIES(vector/AVX.c PROPERTIES COMPILE_FLAGS "-O3 ${C_AVX_FLAGS_} ${C_AVX_FLAGS}")
   ENDIF(MSVC)
   SET(simd ${simd} vector/AVX.c generic/simd/convolve5x5_avx.c)
 ENDIF(C_AVX_FOUND)
@@ -224,11 +242,11 @@ IF(C_AVX2_FOUND)
   IF(MSVC)
     SET_SOURCE_FILES_PROPERTIES(vector/AVX2.c PROPERTIES COMPILE_FLAGS "/Ox /arch:AVX2 ${C_AVX2_FLAGS}")
   ELSE(MSVC)
-    SET_SOURCE_FILES_PROPERTIES(vector/AVX2.c PROPERTIES COMPILE_FLAGS "-O3 ${C_AVX2_FLAGS}")
+    SET_SOURCE_FILES_PROPERTIES(vector/AVX2.c PROPERTIES COMPILE_FLAGS "-O3 ${C_AVX2_FLAGS_} ${C_AVX2_FLAGS}")
   ENDIF(MSVC)
   SET(simd ${simd} vector/AVX2.c)
 ENDIF(C_AVX2_FOUND)
-
+message("++++++++++++++++++++ ${C_AVX_FLAGS} ----- ${C_AVX2_FLAGS}")
 SET(hdr
   THGeneral.h THHalf.h THAllocator.h THStorage.h THTensor.h THTensorApply.h THBlas.h THMath.h
   THLapack.h THLogAdd.h THRandom.h THVector.h THAtomic.h )
