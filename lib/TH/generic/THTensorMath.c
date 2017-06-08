@@ -2867,12 +2867,48 @@ TENSOR_IMPLEMENT_LOGICAL(ge,>=)
 TENSOR_IMPLEMENT_LOGICAL(eq,==)
 TENSOR_IMPLEMENT_LOGICAL(ne,!=)
 
+#ifdef _OPENMP
+
 #define LAB_IMPLEMENT_BASIC_FUNCTION(NAME, CFUNC)             \
-  void THTensor_(NAME)(THTensor *r_, THTensor *t)                \
+  void THTensor_(NAME)(THTensor *r_, THTensor *t)             \
   {                                                           \
     THTensor_(resizeAs)(r_, t);                               \
-    TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data);); \
-  }                                                           \
+    ptrdiff_t r_sz = THTensor_(nElement)(r_);                 \
+    ptrdiff_t tsz = THTensor_(nElement)(t);                   \
+    if( (r_sz == tsz) && (r_sz > TH_OMP_OVERHEAD_THRESHOLD) ) {     								\
+	  TH_TENSOR_APPLY2_ADVANCED_INDEX(real, t, real, r_, *r__data = CFUNC(*t_data);); 			    \
+	}         																						\
+    else {    																						\
+      TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data);); 								\
+    }																								\
+  }                                                             									\
+  
+#else
+#define LAB_IMPLEMENT_BASIC_FUNCTION(NAME, CFUNC)             										\
+  void THTensor_(NAME)(THTensor *r_, THTensor *t)                									\
+  {                                                           										\
+    THTensor_(resizeAs)(r_, t);                               										\
+    TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data);); 								\
+  }  																								\
+  
+#endif
+
+#ifdef _OPENMP
+#define LAB_IMPLEMENT_BASIC_FUNCTION_VALUE(NAME, CFUNC)                 \
+  void THTensor_(NAME)(THTensor *r_, THTensor *t, real value)              \
+  {                                                                     \
+    THTensor_(resizeAs)(r_, t);                               \
+    ptrdiff_t r_sz = THTensor_(nElement)(r_);                 \
+    ptrdiff_t tsz = THTensor_(nElement)(t);                   \
+    if( (r_sz == tsz) && (r_sz > TH_OMP_OVERHEAD_THRESHOLD) ) {     								\
+	  TH_TENSOR_APPLY2_ADVANCED_INDEX(real, t, real, r_, *r__data = CFUNC(*t_data, value);); \
+	}         																						\
+    else {    																						\
+      TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data, value);); \
+    }																								\
+  }                                                                      \
+  
+#else
 
 #define LAB_IMPLEMENT_BASIC_FUNCTION_VALUE(NAME, CFUNC)                 \
   void THTensor_(NAME)(THTensor *r_, THTensor *t, real value)              \
@@ -2880,6 +2916,8 @@ TENSOR_IMPLEMENT_LOGICAL(ne,!=)
     THTensor_(resizeAs)(r_, t);                                         \
     TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data, value);); \
   }                                                                     \
+
+#endif
 
 #if defined(TH_REAL_IS_LONG)
 LAB_IMPLEMENT_BASIC_FUNCTION(abs,labs)

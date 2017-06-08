@@ -179,7 +179,7 @@
 #endif
 
 #define THTENSOR_MAX_DIM 100
-#define TH_OMP_OVERHEAD_THRESHOLD_COPY 10000 
+#define TH_OMP_OVERHEAD_THRESHOLD_COPY 1000 
 
 #define TH_TENSOR_APPLY2_ADVANCED_INDEX(TYPE1, TENSOR1, TYPE2, TENSOR2, CODE) \
 {                                                                             \
@@ -220,10 +220,21 @@
     }                                                                         \
                                                                               \
     if((TENSOR2##StrideContg != 0) && (TENSOR1##StrideContg != 0) ){          \
-      /* for adveanced searching index*/                                        \
+      /* for adveanced searching index*/                                       \
       TYPE2 *tp = THTensor_(data)(TENSOR2);                                    \
       TYPE1 *rp = THTensor_(data)(TENSOR1);                                    \
-      if((TENSOR2##Dim == TENSOR1##Dim) && (TENSOR2##Dim > 2) && TENSOR1##Contg){              \
+      if(TENSOR1##Contg && TENSOR2##Contg){                                    \
+        TYPE1 *TENSOR1##_data = NULL;\
+        TYPE2 *TENSOR2##_data = NULL;\
+        ptrdiff_t iter = 0;\
+        PRAGMA2( omp parallel for if (TENSOR2##Size > TH_OMP_OVERHEAD_THRESHOLD_COPY) private( TENSOR1##_data, TENSOR2##_data, iter) ) \
+        /*there is no parallelism below this level*/ \
+        for (iter = 0; iter < TENSOR1##Size; iter++) {\
+          TENSOR2##_data = tp+iter;\
+          TENSOR1##_data = rp+iter;\
+          CODE                                \
+        }\
+      } else if((TENSOR2##Dim == TENSOR1##Dim) && (TENSOR2##Dim > 2) && TENSOR1##Contg){              \
         ptrdiff_t TENSOR2##BasicIndex = 0;\
         ptrdiff_t TENSOR1##BasicIndex = 0;\
         TYPE1 *TENSOR1##_data = NULL;\
