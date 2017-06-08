@@ -6,7 +6,7 @@
 #include <omp.h>
 #endif
 
-void THTensor_(copy)(THTensor *tensor, THTensor *src)
+void THTensor_(copy2)(THTensor *tensor, THTensor *src)
 {
   if (THTensor_(isContiguous)(tensor) && THTensor_(isContiguous)(src) && THTensor_(nElement)(tensor) == THTensor_(nElement)(src)) {
     real *sp = THTensor_(data)(src);
@@ -28,16 +28,54 @@ void THTensor_(copy)(THTensor *tensor, THTensor *src)
 #endif
   } else {
 #ifdef _OPENMP 
-#ifndef TH_REAL_IS_HALF
     TH_TENSOR_APPLY2_ADVANCED_INDEX(real, tensor, real, src, *tensor_data = *src_data;)
-#else
-    TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data = *src_data;)
-#endif
 #else
     TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data = *src_data;)
 #endif
   }
 }
+
+void THTensor_(copy)(THTensor *tensor, THTensor *src)
+{
+  ptrdiff_t tensorSize = THTensor_(nElement)(tensor);                     
+  ptrdiff_t srcSize = THTensor_(nElement)(src);                     
+  int tensorContig = THTensor_(isContiguous)(tensor)? 1:0;                 
+  int srcContig = THTensor_(isContiguous)(src)? 1:0;                 
+  if (tensorSize == srcSize){
+    if ( tensorContig && srcContig) {
+      real *sp = THTensor_(data)(src);
+      real *rp = THTensor_(data)(tensor);
+#ifndef TH_REAL_IS_HALF
+      THVector_(copy)(rp, sp, srcSize); 
+#else  
+      
+#ifdef _OPENMP
+      if (srcSize > TH_OMP_OVERHEAD_THRESHOLD_COPY) {
+        ptrdiff_t i;   
+        #pragma omp parallel for private (i)
+        for(i=0; i<srcSize; i++){
+          rp[i] = sp[i];
+        }
+      } else {
+		memcpy(rp, sp, srcSize * sizeof(real));  
+	  }  
+#else
+      memcpy(rp, sp, srcSize * sizeof(real));
+#endif
+
+#endif
+    } else {
+#ifdef _OPENMP 
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(srcSize, tensorContig, srcContig, real, tensor, real, src, *tensor_data = *src_data;)
+#else
+      TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data = *src_data;)
+#endif
+	}
+  } else {
+    TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data = *src_data;)
+  }
+}
+
 
 #define IMPLEMENT_THTensor_COPY(TYPENAMESRC, TYPE_SRC) \
 void THTensor_(copy##TYPENAMESRC)(THTensor *tensor, TH##TYPENAMESRC##Tensor *src) \
