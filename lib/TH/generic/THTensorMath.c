@@ -661,7 +661,7 @@ accreal THTensor_(prodall)(THTensor *tensor)
   return prod;
 }
 
-void THTensor_(add)(THTensor *r_, THTensor *t, real value)
+void THTensor_(add2)(THTensor *r_, THTensor *t, real value)
 {
   THTensor_(resizeAs)(r_, t);
   if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(nElement)(r_) == THTensor_(nElement)(t)) {
@@ -675,12 +675,12 @@ void THTensor_(add)(THTensor *r_, THTensor *t, real value)
   }
 }
 
-void THTensor_(sub)(THTensor *r_, THTensor *t, real value)
+void THTensor_(sub2)(THTensor *r_, THTensor *t, real value)
 {
-  THTensor_(add)(r_, t, -value);
+  THTensor_(add2)(r_, t, -value);
 }
 
-void THTensor_(mul)(THTensor *r_, THTensor *t, real value)
+void THTensor_(mul2)(THTensor *r_, THTensor *t, real value)
 {
   THTensor_(resizeAs)(r_, t);
   if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(nElement)(r_) == THTensor_(nElement)(t)) {
@@ -694,7 +694,7 @@ void THTensor_(mul)(THTensor *r_, THTensor *t, real value)
   }
 }
 
-void THTensor_(div)(THTensor *r_, THTensor *t, real value)
+void THTensor_(div2)(THTensor *r_, THTensor *t, real value)
 {
   THTensor_(resizeAs)(r_, t);
   if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(nElement)(r_) == THTensor_(nElement)(t)) {
@@ -708,7 +708,7 @@ void THTensor_(div)(THTensor *r_, THTensor *t, real value)
   }
 }
 
-void THTensor_(lshift)(THTensor *r_, THTensor *t, real value)
+void THTensor_(lshift2)(THTensor *r_, THTensor *t, real value)
 {
 #if defined(TH_REAL_IS_FLOAT)
   return THTensor_(mul)(r_, t, powf(2, value));
@@ -751,7 +751,7 @@ void THTensor_(lshift)(THTensor *r_, THTensor *t, real value)
 #endif
 }
 
-void THTensor_(rshift)(THTensor *r_, THTensor *t, real value)
+void THTensor_(rshift2)(THTensor *r_, THTensor *t, real value)
 {
 #if defined(TH_REAL_IS_FLOAT)
   return THTensor_(div)(r_, t, powf(2, value));
@@ -794,7 +794,7 @@ void THTensor_(rshift)(THTensor *r_, THTensor *t, real value)
 #endif
 }
 
-void THTensor_(fmod)(THTensor *r_, THTensor *t, real value)
+void THTensor_(fmod2)(THTensor *r_, THTensor *t, real value)
 {
   THTensor_(resizeAs)(r_, t);
   if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(nElement)(r_) == THTensor_(nElement)(t)) {
@@ -828,7 +828,7 @@ void THTensor_(fmod)(THTensor *r_, THTensor *t, real value)
   }
 }
 
-void THTensor_(remainder)(THTensor *r_, THTensor *t, real value)
+void THTensor_(remainder2)(THTensor *r_, THTensor *t, real value)
 {
   THTensor_(resizeAs)(r_, t);
   if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(nElement)(r_) == THTensor_(nElement)(t)) {
@@ -868,7 +868,7 @@ void THTensor_(remainder)(THTensor *r_, THTensor *t, real value)
   }
 }
 
-void THTensor_(bitand)(THTensor *r_, THTensor *t, real value)
+void THTensor_(bitand2)(THTensor *r_, THTensor *t, real value)
 {
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_HALF)
   return THError("bitand is only supported for integer type tensors");
@@ -895,7 +895,7 @@ void THTensor_(bitand)(THTensor *r_, THTensor *t, real value)
 #endif
 }
 
-void THTensor_(bitor)(THTensor *r_, THTensor *t, real value)
+void THTensor_(bitor2)(THTensor *r_, THTensor *t, real value)
 {
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_HALF)
   return THError("bitor is only supported for integer type tensors");
@@ -922,7 +922,7 @@ void THTensor_(bitor)(THTensor *r_, THTensor *t, real value)
 #endif
 }
 
-void THTensor_(bitxor)(THTensor *r_, THTensor *t, real value)
+void THTensor_(bitxor2)(THTensor *r_, THTensor *t, real value)
 {
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_HALF)
   return THError("bitxor is only supported for integer type tensors");
@@ -949,7 +949,7 @@ void THTensor_(bitxor)(THTensor *r_, THTensor *t, real value)
 #endif
 }
 
-void THTensor_(clamp)(THTensor *r_, THTensor *t, real min_value, real max_value)
+void THTensor_(clamp2)(THTensor *r_, THTensor *t, real min_value, real max_value)
 {
   THTensor_(resizeAs)(r_, t);
   if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(nElement)(r_) == THTensor_(nElement)(t)) {
@@ -970,7 +970,7 @@ void THTensor_(clamp)(THTensor *r_, THTensor *t, real min_value, real max_value)
   }
 }
 //hallo3
-void THTensor_(cadd)(THTensor *r_, THTensor *t, real value, THTensor *src)
+void THTensor_(cadd2)(THTensor *r_, THTensor *t, real value, THTensor *src)
 {
   THTensor_(resizeAs)(r_, t);
   if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(isContiguous)(src) && THTensor_(nElement)(r_) == THTensor_(nElement)(src)) {
@@ -993,12 +993,12 @@ void THTensor_(cadd)(THTensor *r_, THTensor *t, real value, THTensor *src)
   }
 }
 
-void THTensor_(csub)(THTensor *r_, THTensor *t, real value,THTensor *src)
+void THTensor_(csub2)(THTensor *r_, THTensor *t, real value,THTensor *src)
 {
-  THTensor_(cadd)(r_, t, -value, src);
+  THTensor_(cadd2)(r_, t, -value, src);
 }
 
-void THTensor_(cmul)(THTensor *r_, THTensor *t, THTensor *src)
+void THTensor_(cmul2)(THTensor *r_, THTensor *t, THTensor *src)
 {
   THTensor_(resizeAs)(r_, t);
   if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(isContiguous)(src) && THTensor_(nElement)(r_) == THTensor_(nElement)(src)) {
@@ -1008,7 +1008,7 @@ void THTensor_(cmul)(THTensor *r_, THTensor *t, THTensor *src)
   }
 }
 
-void THTensor_(cpow)(THTensor *r_, THTensor *t, THTensor *src)
+void THTensor_(cpow2)(THTensor *r_, THTensor *t, THTensor *src)
 {
   THTensor_(resizeAs)(r_, t);
   if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(isContiguous)(src) && THTensor_(nElement)(r_) == THTensor_(nElement)(src)) {
@@ -1022,6 +1022,499 @@ void THTensor_(cpow)(THTensor *r_, THTensor *t, THTensor *src)
       rp[i] = pow(tp[i], sp[i]);
   } else {
     TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = pow(*t_data, *src_data););
+  }
+}
+
+void THTensor_(cdiv2)(THTensor *r_, THTensor *t, THTensor *src)
+{
+  THTensor_(resizeAs)(r_, t);
+  if (THTensor_(isContiguous)(r_) && THTensor_(isContiguous)(t) && THTensor_(isContiguous)(src) && THTensor_(nElement)(r_) == THTensor_(nElement)(src)) {
+    TH_TENSOR_APPLY3_CONTIG(real, r_, real, t, real, src, THVector_(cdiv)(r__data, t_data, src_data, r__len););
+  } else {
+    TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data / *src_data;);
+  }
+}
+
+
+
+void THTensor_(add)(THTensor *r_, THTensor *t, real value)
+{
+  THTensor_(resizeAs)(r_, t);    
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      TH_TENSOR_APPLY2_CONTIG(real, r_, real, t, THVector_(adds)(r__data, t_data, value, r__len););
+    } else {
+#ifdef _OPENMP
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data + value;)
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data + value;);
+#endif
+   }
+  } else {
+	TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data + value;);
+  }
+}
+
+void THTensor_(sub)(THTensor *r_, THTensor *t, real value)
+{
+  THTensor_(add)(r_, t, -value);
+}
+
+void THTensor_(mul)(THTensor *r_, THTensor *t, real value)
+{
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      TH_TENSOR_APPLY2_CONTIG(real, r_, real, t, THVector_(muls)(r__data, t_data, value, r__len););
+    } else {
+#ifdef _OPENMP
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data * value;)
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data * value;);
+#endif
+    }
+  } else {
+	TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data * value;);
+  }
+}
+
+void THTensor_(div)(THTensor *r_, THTensor *t, real value)
+{
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      TH_TENSOR_APPLY2_CONTIG(real, r_, real, t, THVector_(divs)(r__data, t_data, value, r__len););
+    } else {
+#ifdef _OPENMP
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data / value;)
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data / value;);
+#endif
+    }
+  } else {
+	TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data / value;);
+  }
+}
+
+void THTensor_(lshift)(THTensor *r_, THTensor *t, real value)
+{
+#if defined(TH_REAL_IS_FLOAT)
+  return THTensor_(mul)(r_, t, powf(2, value));
+#elif defined(TH_REAL_IS_DOUBLE)
+  return THTensor_(mul)(r_, t, pow(2, value));
+#elif defined(TH_REAL_IS_HALF)
+  return THError("lshift is not supported for torch.HalfTensor");
+#else
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      real *tp = THTensor_(data)(t);
+      real *rp = THTensor_(data)(r_);
+      long i;
+      #pragma omp parallel for if(r_Size > TH_OMP_OVERHEAD_THRESHOLD * 100) private(i)
+      for (i=0; i<r_Size; i++) {
+#if defined(TH_REAL_IS_BYTE)
+          rp[i] = ((real) tp[i]) << value;
+#else
+          rp[i] = ((unsigned real) tp[i]) << value;
+#endif
+      }
+    } else {
+#ifdef _OPENMP
+#if defined(TH_REAL_IS_BYTE)
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = (((real) *t_data) << value););
+#else
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = (((unsigned real) *t_data) << value););
+#endif
+#else
+#if defined(TH_REAL_IS_BYTE)
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (((real) *t_data) << value););
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (((unsigned real) *t_data) << value););
+#endif
+#endif
+    }
+  } else {
+#if defined(TH_REAL_IS_BYTE)
+    TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (((real) *t_data) << value););
+#else
+    TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (((unsigned real) *t_data) << value););
+#endif
+  }
+#endif
+}
+
+void THTensor_(rshift)(THTensor *r_, THTensor *t, real value)
+{
+#if defined(TH_REAL_IS_FLOAT)
+  return THTensor_(div)(r_, t, powf(2, value));
+#elif defined(TH_REAL_IS_DOUBLE)
+  return THTensor_(div)(r_, t, pow(2, value));
+#elif defined(TH_REAL_IS_HALF)
+  return THError("rshift is not supported for torch.HalfTensor");
+#else
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      real *tp = THTensor_(data)(t);
+      real *rp = THTensor_(data)(r_);
+      long i;
+      #pragma omp parallel for if(r_Size > TH_OMP_OVERHEAD_THRESHOLD * 100) private(i)
+      for (i=0; i<r_Size; i++) {
+#if defined(TH_REAL_IS_BYTE)
+          rp[i] = ((real) tp[i]) >> value;
+#else
+          rp[i] = ((unsigned real) tp[i]) >> value;
+#endif
+      }
+    } else {
+#ifdef _OPENMP
+#if defined(TH_REAL_IS_BYTE)
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = (((real) *t_data) >> value););
+#else
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = (((unsigned real) *t_data) >> value););
+#endif
+#else
+#if defined(TH_REAL_IS_BYTE)
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (((real) *t_data) >> value););
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (((unsigned real) *t_data) >> value););
+#endif
+#endif
+    }
+  } else {
+#if defined(TH_REAL_IS_BYTE)
+    TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (((real) *t_data) >> value););
+#else
+    TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (((unsigned real) *t_data) >> value););
+#endif
+  }
+#endif
+}
+
+void THTensor_(fmod)(THTensor *r_, THTensor *t, real value)
+{
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+
+      real *tp = THTensor_(data)(t);
+      real *rp = THTensor_(data)(r_);
+      ptrdiff_t i;
+      #pragma omp parallel for if(r_Size > TH_OMP_OVERHEAD_THRESHOLD) private(i)
+      for (i=0; i<r_Size; i++) {
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+          rp[i] = fmod(tp[i], value);
+#else
+          rp[i] = tp[i] % value;
+#endif
+      }
+    } else {
+#ifdef _OPENMP
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = fmod(*t_data, value););
+#else
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = (*t_data % value););
+#endif
+#else
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = fmod(*t_data, value););
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (*t_data % value););
+#endif
+#endif
+    }
+  } else {
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+    TH_TENSOR_APPLY2(real, r_, real, t, *r__data = fmod(*t_data, value););
+#else
+    TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (*t_data % value););
+#endif
+  }
+}
+
+void THTensor_(remainder)(THTensor *r_, THTensor *t, real value)
+{
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      real *tp = THTensor_(data)(t);
+      real *rp = THTensor_(data)(r_);
+      ptrdiff_t i;
+      #pragma omp parallel for if(r_Size > TH_OMP_OVERHEAD_THRESHOLD) private(i)
+      for (i=0; i<r_Size; i++) {
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+          rp[i] = (value == 0)? NAN : tp[i] - value * floor(tp[i] / value);
+#else
+          // There is no NAN for integers
+          rp[i] = tp[i] % value;
+          if (rp[i] * value < 0)
+            rp[i] += value;
+#endif
+      }
+    } else {
+#ifdef _OPENMP
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = (value == 0)? NAN : *t_data - value * floor(*t_data / value););
+#else
+       // There is no NAN for integers
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data % value;
+                                          if (*r__data * value < 0) *r__data += value;);
+#endif
+#else
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (value == 0)? NAN : *t_data - value * floor(*t_data / value););
+#else
+       // There is no NAN for integers
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data % value;
+                                          if (*r__data * value < 0) *r__data += value;);
+#endif
+#endif
+    }
+  } else {
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+    TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (value == 0)? NAN : *t_data - value * floor(*t_data / value););
+#else
+    // There is no NAN for integers
+    TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data % value;
+                                          if (*r__data * value < 0) *r__data += value;);
+#endif
+  }
+}
+
+void THTensor_(bitand)(THTensor *r_, THTensor *t, real value)
+{
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_HALF)
+  return THError("bitand is only supported for integer type tensors");
+#else
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      real *tp = THTensor_(data)(t);
+      real *rp = THTensor_(data)(r_);
+      long i;
+      #pragma omp parallel for if(r_Size > TH_OMP_OVERHEAD_THRESHOLD * 100) private(i)
+      for (i=0; i<r_Size; i++) {
+          rp[i] = tp[i] & value;
+      }
+    } else {
+#ifdef _OPENMP
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data & value;);
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data & value;);
+#endif 
+    }
+  } else {
+	TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data & value;);
+  }
+#endif
+}
+
+void THTensor_(bitor)(THTensor *r_, THTensor *t, real value)
+{
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_HALF)
+  return THError("bitor is only supported for integer type tensors");
+#else
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      real *tp = THTensor_(data)(t);
+      real *rp = THTensor_(data)(r_);
+      
+      long i;
+      #pragma omp parallel for if(r_Size > TH_OMP_OVERHEAD_THRESHOLD * 100) private(i)
+      for (i=0; i<r_Size; i++) {
+          rp[i] = tp[i] | value;
+      }
+    } else {
+#ifdef _OPENMP
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data | value;);
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data | value;);
+#endif
+    }
+  } else {
+	TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data | value;);
+  }
+#endif
+}
+
+void THTensor_(bitxor)(THTensor *r_, THTensor *t, real value)
+{
+#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_HALF)
+  return THError("bitxor is only supported for integer type tensors");
+#else
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      real *tp = THTensor_(data)(t);
+      real *rp = THTensor_(data)(r_);
+      
+      long i;
+      #pragma omp parallel for if(r_Size > TH_OMP_OVERHEAD_THRESHOLD * 100) private(i)
+      for (i=0; i<r_Size; i++) {
+          rp[i] = tp[i] ^ value;
+      }
+    } else {
+#ifdef _OPENMP
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data ^ value;);
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data ^ value;);
+#endif
+    }
+  } else {
+	TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data ^ value;); 
+  }
+#endif
+}
+
+void THTensor_(clamp)(THTensor *r_, THTensor *t, real min_value, real max_value)
+{
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t tSize = THTensor_(nElement)(t);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  if (tSize == r_Size){
+    if (r_Contig && tContig) {
+      real *tp = THTensor_(data)(t);
+      real *rp = THTensor_(data)(r_);
+      /* real t_val; */
+      
+      ptrdiff_t i;
+      #pragma omp parallel for if(r_Size > TH_OMP_OVERHEAD_THRESHOLD) private(i)
+      for (i=0; i<r_Size; i++)
+        rp[i] = (tp[i] < min_value) ? min_value : (tp[i] > max_value ? max_value : tp[i]);
+    } else {
+#ifdef _OPENMP
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = (*t_data < min_value) ? min_value : (*t_data > max_value ? max_value : *t_data););
+#else
+      TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (*t_data < min_value) ? min_value : (*t_data > max_value ? max_value : *t_data););
+#endif
+    }
+  } else {
+	  TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (*t_data < min_value) ? min_value : (*t_data > max_value ? max_value : *t_data););
+  }
+}
+//hallo3
+void THTensor_(cadd)(THTensor *r_, THTensor *t, real value, THTensor *src)
+{
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t srcSize = THTensor_(nElement)(src);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  int srcContig = THTensor_(isContiguous)(src)? 1:0;  
+  if (srcSize == r_Size){
+    if (r_Contig && tContig && srcContig) { 
+      if(r_ == t) {
+        THBlas_(axpy)(THTensor_(nElement)(t), value, THTensor_(data)(src), 1, THTensor_(data)(r_), 1);
+      } else {
+        TH_TENSOR_APPLY3_CONTIG(real, r_, real, t, real, src, THVector_(cadd)(r__data, t_data, src_data, value, r__len););
+      }
+    } else {
+#if _OPENMP
+      if(r_ == t) {
+        TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, srcContig, real, r_, real, src, *r__data = *r__data + value * *src_data;);
+      } else {
+        TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data + value * *src_data;);
+      }
+#else
+      TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data + value * *src_data;);
+#endif
+    }
+  } else {
+	TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data + value * *src_data;);  
+  }
+}
+
+void THTensor_(csub)(THTensor *r_, THTensor *t, real value,THTensor *src)
+{
+  THTensor_(cadd)(r_, t, -value, src);
+}
+
+void THTensor_(cmul)(THTensor *r_, THTensor *t, THTensor *src)
+{
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t srcSize = THTensor_(nElement)(src);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  int srcContig = THTensor_(isContiguous)(src)? 1:0;  
+  if (srcSize == r_Size){
+    if (r_Contig && tContig && srcContig) {
+      TH_TENSOR_APPLY3_CONTIG(real, r_, real, t, real, src, THVector_(cmul)(r__data, t_data, src_data, r__len););
+    } else {
+      TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data * *src_data;);
+    }
+  } else {
+	  TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data * *src_data;);
+  }
+}
+
+void THTensor_(cpow)(THTensor *r_, THTensor *t, THTensor *src)
+{
+  THTensor_(resizeAs)(r_, t);
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t srcSize = THTensor_(nElement)(src);                     
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int tContig = THTensor_(isContiguous)(t)? 1:0;   
+  int srcContig = THTensor_(isContiguous)(src)? 1:0;  
+  if (srcSize == r_Size){
+    if (r_Contig && tContig && srcContig) {
+      real *tp = THTensor_(data)(t);
+      real *sp = THTensor_(data)(src);
+      real *rp = THTensor_(data)(r_);
+      
+      ptrdiff_t i;
+      #pragma omp parallel for if(r_Size > TH_OMP_OVERHEAD_THRESHOLD) private(i)
+      for (i=0; i<r_Size; i++)
+        rp[i] = pow(tp[i], sp[i]);
+    } else {
+      TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = pow(*t_data, *src_data););
+    }
+  } else {
+	TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = pow(*t_data, *src_data);); 
   }
 }
 
@@ -2873,10 +3366,12 @@ TENSOR_IMPLEMENT_LOGICAL(ne,!=)
   void THTensor_(NAME)(THTensor *r_, THTensor *t)             \
   {                                                           \
     THTensor_(resizeAs)(r_, t);                               \
-    ptrdiff_t r_sz = THTensor_(nElement)(r_);                 \
-    ptrdiff_t tsz = THTensor_(nElement)(t);                   \
-    if( (r_sz == tsz) && (r_sz > TH_OMP_OVERHEAD_THRESHOLD) ) {     								\
-	  TH_TENSOR_APPLY2_ADVANCED_INDEX(real, t, real, r_, *r__data = CFUNC(*t_data);); 			    \
+    ptrdiff_t r_Size = THTensor_(nElement)(r_);                 \
+    ptrdiff_t tSize = THTensor_(nElement)(t);                   \
+    int r_Contig = THTensor_(isContiguous)(r_)? 1:0;          \
+    int tContig = THTensor_(isContiguous)(t)? 1:0;            \
+    if( (tSize == r_Size) && (r_Size > TH_OMP_OVERHEAD_THRESHOLD) ){                                 \
+	  TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, t, real, r_, *r__data = CFUNC(*t_data);); 			    \
 	}         																						\
     else {    																						\
       TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data);); 								\
