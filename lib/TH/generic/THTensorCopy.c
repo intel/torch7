@@ -19,7 +19,6 @@ void THTensor_(copy)(THTensor *tensor, THTensor *src)
     ptrdiff_t i;
     
     #pragma omp parallel for if (sz > TH_OMP_OVERHEAD_THRESHOLD_COPY) private (i)
-    #pragma ivdep
     for(i=0; i<sz; i++){
       rp[i] = sp[i];
     }  
@@ -28,8 +27,12 @@ void THTensor_(copy)(THTensor *tensor, THTensor *src)
 #endif
 #endif
   } else {
-#ifdef _OPENMP
-    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, tensor, real, src, tensorLocal[i] = srcLocal[j];, *tensor_data = *src_data;)
+#ifdef _OPENMP 
+#ifndef TH_REAL_IS_HALF
+    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, tensor, real, src, *tensor_data = *src_data;)
+#else
+    TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data = *src_data;)
+#endif
 #else
     TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data = *src_data;)
 #endif

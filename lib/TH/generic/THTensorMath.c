@@ -668,7 +668,7 @@ void THTensor_(add)(THTensor *r_, THTensor *t, real value)
     TH_TENSOR_APPLY2_CONTIG(real, r_, real, t, THVector_(adds)(r__data, t_data, value, r__len););
   } else {
 #ifdef _OPENMP
-    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = tLocal[j] + value;, *r__data = *t_data + value;)
+    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = *t_data + value;)
 #else
     TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data + value;);
 #endif
@@ -687,7 +687,7 @@ void THTensor_(mul)(THTensor *r_, THTensor *t, real value)
     TH_TENSOR_APPLY2_CONTIG(real, r_, real, t, THVector_(muls)(r__data, t_data, value, r__len););
   } else {
 #ifdef _OPENMP
-    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = tLocal[j] * value;, *r__data = *t_data * value;)
+    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = *t_data * value;)
 #else
     TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data * value;);
 #endif
@@ -701,7 +701,7 @@ void THTensor_(div)(THTensor *r_, THTensor *t, real value)
     TH_TENSOR_APPLY2_CONTIG(real, r_, real, t, THVector_(divs)(r__data, t_data, value, r__len););
   } else {
 #ifdef _OPENMP
-    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = tLocal[j] / value;, *r__data = *t_data / value;)
+    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = *t_data / value;)
 #else
     TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data / value;);
 #endif
@@ -736,9 +736,9 @@ void THTensor_(lshift)(THTensor *r_, THTensor *t, real value)
   } else {
 #ifdef _OPENMP
 #if defined(TH_REAL_IS_BYTE)
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = (((real) tLocal[j]) << value);, *r__data = (((real) *t_data) << value););
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = (((real) *t_data) << value););
 #else
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = (((unsigned real) tLocal[j]) << value);, *r__data = (((unsigned real) *t_data) << value););
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = (((unsigned real) *t_data) << value););
 #endif
 #else
 #if defined(TH_REAL_IS_BYTE)
@@ -779,9 +779,9 @@ void THTensor_(rshift)(THTensor *r_, THTensor *t, real value)
   } else {
 #ifdef _OPENMP
 #if defined(TH_REAL_IS_BYTE)
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = (((real) tLocal[j]) >> value);, *r__data = (((real) *t_data) >> value););
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = (((real) *t_data) >> value););
 #else
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = (((unsigned real) tLocal[j]) >> value);, *r__data = (((unsigned real) *t_data) >> value););
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = (((unsigned real) *t_data) >> value););
 #endif
 #else
 #if defined(TH_REAL_IS_BYTE)
@@ -814,9 +814,9 @@ void THTensor_(fmod)(THTensor *r_, THTensor *t, real value)
   } else {
 #ifdef _OPENMP
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = fmod(tLocal[j], value);,  *r__data = fmod(*t_data, value););
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = fmod(*t_data, value););
 #else
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = (tLocal[j] % value);, *r__data = (*t_data % value););
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = (*t_data % value););
 #endif
 #else
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
@@ -850,12 +850,10 @@ void THTensor_(remainder)(THTensor *r_, THTensor *t, real value)
   } else {
 #ifdef _OPENMP
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = (value == 0)? NAN : tLocal[j] - value * floor(tLocal[j] / value);,  *r__data = (value == 0)? NAN : *t_data - value * floor(*t_data / value););
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = (value == 0)? NAN : *t_data - value * floor(*t_data / value););
 #else
        // There is no NAN for integers
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = tLocal[j] % value;
-                                          if (r_Local[i] * value < 0) r_Local[i] += value;,
-                                          *r__data = *t_data % value;
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = *t_data % value;
                                           if (*r__data * value < 0) *r__data += value;);
 #endif
 #else
@@ -889,7 +887,7 @@ void THTensor_(bitand)(THTensor *r_, THTensor *t, real value)
       }
   } else {
 #ifdef _OPENMP
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = tLocal[j] & value;, *r__data = *t_data & value;);
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = *t_data & value;);
 #else
       TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data & value;);
 #endif 
@@ -916,7 +914,7 @@ void THTensor_(bitor)(THTensor *r_, THTensor *t, real value)
       }
   } else {
 #ifdef _OPENMP
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = tLocal[j] | value;, *r__data = *t_data | value;);
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = *t_data | value;);
 #else
       TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data | value;);
 #endif
@@ -943,7 +941,7 @@ void THTensor_(bitxor)(THTensor *r_, THTensor *t, real value)
       }
   } else {
 #ifdef _OPENMP
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = tLocal[j] ^ value;, *r__data = *t_data ^ value;);
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = *t_data ^ value;);
 #else
       TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data ^ value;);
 #endif
@@ -965,7 +963,7 @@ void THTensor_(clamp)(THTensor *r_, THTensor *t, real min_value, real max_value)
       rp[i] = (tp[i] < min_value) ? min_value : (tp[i] > max_value ? max_value : tp[i]);
   } else {
 #ifdef _OPENMP
-    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, r_Local[i] = (tLocal[j] < min_value) ? min_value : (tLocal[j] > max_value ? max_value : tLocal[j]);, *r__data = (*t_data < min_value) ? min_value : (*t_data > max_value ? max_value : *t_data););
+    TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, t, *r__data = (*t_data < min_value) ? min_value : (*t_data > max_value ? max_value : *t_data););
 #else
     TH_TENSOR_APPLY2(real, r_, real, t, *r__data = (*t_data < min_value) ? min_value : (*t_data > max_value ? max_value : *t_data););
 #endif
@@ -984,7 +982,7 @@ void THTensor_(cadd)(THTensor *r_, THTensor *t, real value, THTensor *src)
   } else {
 #if _OPENMP
    if(r_ == t) {
-      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, src, r_Local[i] = r_Local[i] + value * srcLocal[j]; , *r__data = *r__data + value * *src_data;);
+      TH_TENSOR_APPLY2_ADVANCED_INDEX(real, r_, real, src, *r__data = *r__data + value * *src_data;);
     } else {
       TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data + value * *src_data;);
     }
