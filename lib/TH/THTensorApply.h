@@ -181,6 +181,65 @@
 #define THTENSOR_MAX_DIM 100
 #define TH_OMP_OVERHEAD_THRESHOLD_COPY 1000 
 
+#define TH_TENSOR_APPLY_REDUCTION_ADVANCED_INDEX(TYPE1, TENSOR1, OPERATION, CODE) \
+{                                                                               \
+	int TENSOR1##Dim = TENSOR1->nDimension;                                     \
+	ptrdiff_t TENSOR1##Size = THTensor_(nElement)(TENSOR1);                     \
+	int TENSOR1##Contg = THTensor_(isContiguous)(TENSOR1)? 1:0;                 \
+	int omp_flag = omp_in_parallel();                                            \
+    if(0 == omp_flag) {                                                         \
+		int TENSOR1##StrideContg = 1;                                             \
+		ptrdiff_t TENSOR1##Stride[THTENSOR_MAX_DIM] = {0};                        \
+		ptrdiff_t strideSomeDim = 1;                                              \
+        int dim;                                                                  \
+        strideSomeDim = 1;                                                        \
+        for (dim = TENSOR1##Dim; dim > 0; dim--){                                 \
+          if(0 == TENSOR1->stride[dim])  {                                         \
+              TENSOR1##StrideContg = 0;                                              \
+              break;                                                                \
+          }                                                                       \
+          strideSomeDim *= TENSOR1->size[dim-1];                                  \
+          TENSOR1##Stride[dim-1] = strideSomeDim;                                 \
+        }                                                                         \
+        if(TENSOR1##StrideContg != 0) {                                          \
+		  TYPE1 *rp = THTensor_(data)(TENSOR1);                                    \
+          if(TENSOR1##Contg){                                    \
+            TYPE1 *TENSOR1##_data = NULL;         \
+            ptrdiff_t index = 0;\
+            ptrdiff_t iter = 0;\
+            ptrdiff_t dim = 0;\
+            PRAGMA2( omp parallel for if (TENSOR1##Size > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR1##_data,  iter) reduction(OPERATION) ) \
+            for (iter = 0; iter < TENSOR1##Size; iter++) {\
+              TENSOR1##_data = rp+iter;\
+              CODE                                \
+            }\
+		  } else { \
+			ptrdiff_t TENSOR1##BasicIndex = 0;\
+			TYPE1 *TENSOR1##_data = NULL;         \
+            ptrdiff_t index = 0;\
+            ptrdiff_t iter = 0;\
+            ptrdiff_t dim = 0;\
+            PRAGMA2( omp parallel for if (TENSOR1##Size > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR1##BasicIndex, TENSOR1##_data, index, iter, dim) reduction(OPERATION) ) \
+            for (iter = 0; iter < TENSOR1##Size; iter++) {\
+			  TENSOR1##BasicIndex = 0;\
+			  for(dim = 0; dim < TENSOR1##Dim-1; dim++) {\
+                index = (iter%TENSOR1##Stride[dim])/TENSOR1##Stride[dim+1];\
+                TENSOR1##BasicIndex += index*TENSOR1->stride[dim];\
+              }\
+              index = iter%TENSOR1##Stride[dim];\
+              TENSOR1##BasicIndex += index*TENSOR1->stride[dim];\
+              TENSOR1##_data = rp+TENSOR1##BasicIndex;\
+              CODE                                \
+            }\
+		  }\
+		} else {\
+			TH_TENSOR_APPLY(TYPE1, TENSOR1, CODE);\
+		}\
+	} else {\
+		TH_TENSOR_APPLY(TYPE1, TENSOR1, CODE);\
+	}\
+}
+
 #define TH_TENSOR_APPLY2_ADVANCED_INDEX(TYPE1, TENSOR1, TYPE2, TENSOR2, CODE) \
 {                                                                             \
   int TENSOR1##Dim = TENSOR1->nDimension;                                     \
