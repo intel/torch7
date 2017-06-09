@@ -1485,7 +1485,15 @@ void THTensor_(cmul)(THTensor *r_, THTensor *t, THTensor *src)
     if (r_Contig && tContig && srcContig) {
       TH_TENSOR_APPLY3_CONTIG(real, r_, real, t, real, src, THVector_(cmul)(r__data, t_data, src_data, r__len););
     } else {
+#if _OPENMP
+      if(r_ == t) {
+        TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, srcContig, real, r_, real, src, *r__data = *r__data * *src_data;);
+      } else {
+        TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data * *src_data;);
+      }
+#else
       TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data * *src_data;);
+#endif
     }
   } else {
 	  TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data * *src_data;);
@@ -1765,8 +1773,22 @@ void THTensor_(addcmul)(THTensor *r_, THTensor *t, real value, THTensor *src1, T
     THTensor_(resizeAs)(r_, t);
     THTensor_(copy)(r_, t);
   }
-
-  TH_TENSOR_APPLY3(real, r_, real, src1, real, src2, *r__data += value * *src1_data * *src2_data;);
+  // actually  it is that r_ is identical to t, there are only 3 tensor
+  ptrdiff_t r_Size = THTensor_(nElement)(r_);                     
+  ptrdiff_t src1Size = THTensor_(nElement)(src1);   
+  ptrdiff_t src2Size = THTensor_(nElement)(src2);                    
+  int r_Contig = THTensor_(isContiguous)(r_)? 1:0;                 
+  int src1Contig = THTensor_(isContiguous)(src1)? 1:0;   
+  int src2Contig = THTensor_(isContiguous)(src2)? 1:0;  
+  if((src1Size = src2Size) && (src1Size == r_Size) ){	  
+#ifdef _OPENMP
+    TH_TENSOR_APPLY3_ADVANCED_INDEX2(r_Size, r_Contig, src1Contig, src2Contig, real, r_, real, src1, real, src2, *r__data += value * *src1_data * *src2_data;);
+#else
+    TH_TENSOR_APPLY3(real, r_, real, src1, real, src2, *r__data += value * *src1_data * *src2_data;);
+#endif
+  } else {
+	TH_TENSOR_APPLY3(real, r_, real, src1, real, src2, *r__data += value * *src1_data * *src2_data;);  
+  }
 }
 
 
@@ -2617,9 +2639,16 @@ void THTensor_(randperm)(THTensor *r_, THGenerator *_generator, long n)
   r__data = THTensor_(data)(r_);
   r__stride_0 = THTensor_(stride)(r_,0);
 
+#ifdef _OPENMP
+  int omp_flag = omp_in_parallel();
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD) && ( 0 == omp_flag) )private (i)  
+#endif
   for(i = 0; i < n; i++)
     r__data[i*r__stride_0] = (real)(i);
-
+    
+#ifdef _OPENMP
+  #pragma omp parallel for if ( (n > TH_OMP_OVERHEAD_THRESHOLD) && ( 0 == omp_flag) )private (i)  
+#endif
   for(i = 0; i < n-1; i++)
   {
     long z = THRandom_random(_generator) % (n-i);
