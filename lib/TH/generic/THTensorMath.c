@@ -3393,14 +3393,16 @@ TENSOR_IMPLEMENT_LOGICAL(ne,!=)
   void THTensor_(NAME)(THTensor *r_, THTensor *t, real value)              \
   {                                                                     \
     THTensor_(resizeAs)(r_, t);                               \
-    ptrdiff_t r_sz = THTensor_(nElement)(r_);                 \
-    ptrdiff_t tsz = THTensor_(nElement)(t);                   \
-    if( (r_sz == tsz) && (r_sz > TH_OMP_OVERHEAD_THRESHOLD) ) {     								\
-	  TH_TENSOR_APPLY2_ADVANCED_INDEX(real, t, real, r_, *r__data = CFUNC(*t_data, value);); \
+    ptrdiff_t r_Size = THTensor_(nElement)(r_);                 \
+    ptrdiff_t tSize = THTensor_(nElement)(t);                   \
+    int r_Contig = THTensor_(isContiguous)(r_)? 1:0;          \
+    int tContig = THTensor_(isContiguous)(t)? 1:0;            \
+    if( (tSize == r_Size) && (r_Size > TH_OMP_OVERHEAD_THRESHOLD) ){                                 \
+	  TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, t, real, r_, *r__data = CFUNC(*t_data, value);); 			    \
 	}         																						\
     else {    																						\
-      TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data, value);); \
-    }																								\
+      TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data, value);); 								\
+    }																							\
   }                                                                      \
   
 #else
