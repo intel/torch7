@@ -3208,6 +3208,22 @@ TENSOR_IMPLEMENT_LOGICAL(ne,!=)
     }																								\
   }                                                             									\
   
+#define LAB_IMPLEMENT_BASIC_CODE(NAME, CODE)             \
+  void THTensor_(NAME)(THTensor *r_, THTensor *t)             \
+  {                                                           \
+    THTensor_(resizeAs)(r_, t);                               \
+    ptrdiff_t r_Size = THTensor_(nElement)(r_);                 \
+    ptrdiff_t tSize = THTensor_(nElement)(t);                   \
+    int r_Contig = THTensor_(isContiguous)(r_)? 1:0;          \
+    int tContig = THTensor_(isContiguous)(t)? 1:0;            \
+    if( (tSize == r_Size) && (r_Size > TH_OMP_OVERHEAD_THRESHOLD) ){                                 \
+	  TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, t, real, r_, CODE); 			    \
+	}         																						\
+    else {    																						\
+      TH_TENSOR_APPLY2(real, t, real, r_, CODE); 								\
+    }																								\
+  }    
+  
 #else
 #define LAB_IMPLEMENT_BASIC_FUNCTION(NAME, CFUNC)             										\
   void THTensor_(NAME)(THTensor *r_, THTensor *t)                									\
@@ -3216,7 +3232,17 @@ TENSOR_IMPLEMENT_LOGICAL(ne,!=)
     TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data);); 								\
   }  																								\
   
+  #define LAB_IMPLEMENT_BASIC_CODE(NAME, CODE)             										\
+  void THTensor_(NAME)(THTensor *r_, THTensor *t)                									\
+  {                                                           										\
+    THTensor_(resizeAs)(r_, t);                               										\
+    TH_TENSOR_APPLY2(real, t, real, r_, CODE); 								\
+  }  																								\
+  
+
 #endif
+
+
 
 #ifdef _OPENMP
 #define LAB_IMPLEMENT_BASIC_FUNCTION_VALUE(NAME, CFUNC)                 \
@@ -3245,6 +3271,7 @@ TENSOR_IMPLEMENT_LOGICAL(ne,!=)
   }                                                                     \
 
 #endif
+
 
 #if defined(TH_REAL_IS_LONG)
 LAB_IMPLEMENT_BASIC_FUNCTION(abs,labs)
@@ -3275,14 +3302,22 @@ TENSOR_IMPLEMENT_LOGICAL_SUM(logicalany, ||, 0)
 
 #if defined (TH_REAL_IS_FLOAT)
 #define TH_MATH_NAME(fn) fn##f
+LAB_IMPLEMENT_BASIC_CODE(sigmoid, *r__data = 1.0 / (1.0 + expf(-(*t_data)));)
+LAB_IMPLEMENT_BASIC_CODE(rsqrt, *r__data = 1.0 / sqrtf(*t_data);)
+LAB_IMPLEMENT_BASIC_CODE(frac, *r__data = *t_data - truncf(*t_data);)
 #else
 #define TH_MATH_NAME(fn) fn
+LAB_IMPLEMENT_BASIC_CODE(sigmoid, *r__data = 1.0 / (1.0 + exp(-(*t_data)));)
+LAB_IMPLEMENT_BASIC_CODE(rsqrt, *r__data = 1.0 / sqrt(*t_data);)
+LAB_IMPLEMENT_BASIC_CODE(frac, *r__data = *t_data - trunc(*t_data);)
 #endif
+
 
 LAB_IMPLEMENT_BASIC_FUNCTION(log,TH_MATH_NAME(log))
 LAB_IMPLEMENT_BASIC_FUNCTION(lgamma,TH_MATH_NAME(lgamma))
 LAB_IMPLEMENT_BASIC_FUNCTION(log1p,TH_MATH_NAME(log1p))
-LAB_IMPLEMENT_BASIC_FUNCTION(sigmoid,TH_MATH_NAME(TH_sigmoid))
+//LAB_IMPLEMENT_BASIC_FUNCTION(sigmoid,TH_MATH_NAME(TH_sigmoid))
+
 LAB_IMPLEMENT_BASIC_FUNCTION(exp,TH_MATH_NAME(exp))
 LAB_IMPLEMENT_BASIC_FUNCTION(cos,TH_MATH_NAME(cos))
 LAB_IMPLEMENT_BASIC_FUNCTION(acos,TH_MATH_NAME(acos))
@@ -3295,13 +3330,13 @@ LAB_IMPLEMENT_BASIC_FUNCTION(atan,TH_MATH_NAME(atan))
 LAB_IMPLEMENT_BASIC_FUNCTION(tanh,TH_MATH_NAME(tanh))
 LAB_IMPLEMENT_BASIC_FUNCTION_VALUE(pow,TH_MATH_NAME(pow))
 LAB_IMPLEMENT_BASIC_FUNCTION(sqrt,TH_MATH_NAME(sqrt))
-LAB_IMPLEMENT_BASIC_FUNCTION(rsqrt,TH_MATH_NAME(TH_rsqrt))
+//LAB_IMPLEMENT_BASIC_FUNCTION(rsqrt,TH_MATH_NAME(TH_rsqrt))
 LAB_IMPLEMENT_BASIC_FUNCTION(ceil,TH_MATH_NAME(ceil))
 LAB_IMPLEMENT_BASIC_FUNCTION(floor,TH_MATH_NAME(floor))
 LAB_IMPLEMENT_BASIC_FUNCTION(round,TH_MATH_NAME(round))
 LAB_IMPLEMENT_BASIC_FUNCTION(abs,TH_MATH_NAME(fabs))
 LAB_IMPLEMENT_BASIC_FUNCTION(trunc,TH_MATH_NAME(trunc))
-LAB_IMPLEMENT_BASIC_FUNCTION(frac,TH_MATH_NAME(TH_frac))
+//LAB_IMPLEMENT_BASIC_FUNCTION(frac,TH_MATH_NAME(TH_frac))
 LAB_IMPLEMENT_BASIC_FUNCTION(neg,-)
 LAB_IMPLEMENT_BASIC_FUNCTION(cinv, TH_MATH_NAME(1.0) / )
 
