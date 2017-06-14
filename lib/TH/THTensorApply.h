@@ -422,7 +422,7 @@
         TYPE2 *TENSOR2##_data = NULL;\
         ptrdiff_t iter = 0;\
         if(tp != rp) { \
-          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private( TENSOR1##_data, TENSOR2##_data, iter) ) \
+          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
           PRAGMA2(ivdep) \
           for (iter = 0; iter < SIZE; iter++) {\
             /*TENSOR2##_data = tp+iter;*/\
@@ -430,7 +430,7 @@
             VCODE                                \
           }\
         } else {\
-          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private( TENSOR1##_data, TENSOR2##_data, iter) ) \
+          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
           for (iter = 0; iter < SIZE; iter++) {\
             /*TENSOR2##_data = tp+iter;*/\
             /*TENSOR1##_data = rp+iter;*/\
@@ -445,7 +445,7 @@
         ptrdiff_t iter = 0;\
         ptrdiff_t dim = 0;\
                           \
-        PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR2##BasicIndex, TENSOR1##_data, TENSOR2##_data, index, iter, dim) )  \
+        PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR1##_data, TENSOR2##_data) )  \
         for (iter = 0; iter < SIZE; iter++) {\
           TENSOR2##BasicIndex = 0;\
           for(dim = 0; dim < TENSOR2##Dim-1; dim++) {\
@@ -468,7 +468,7 @@
         ptrdiff_t iter = 0;\
         ptrdiff_t dim = 0;\
                           \
-        PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR1##BasicIndex, TENSOR1##_data, TENSOR2##_data, index, iter, dim) )  \
+        PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR1##_data, TENSOR2##_data) )  \
         for (iter = 0; iter < SIZE; iter++) {\
           TENSOR1##BasicIndex = 0;\
 \
@@ -491,7 +491,7 @@
         ptrdiff_t iter = 0;\
         ptrdiff_t dim = 0;\
                           \
-        PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR2##BasicIndex, TENSOR1##BasicIndex, TENSOR1##_data, TENSOR2##_data, index, iter, dim) )  \
+        PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR1##_data, TENSOR2##_data )  )\
         /*there is no parallelism below this level*/ \
         for (iter = 0; iter < SIZE; iter++) {\
           TENSOR2##BasicIndex = 0;\
@@ -580,7 +580,7 @@
         TYPE3 *TENSOR3##_data = NULL;\
         ptrdiff_t iter = 0;\
         if (rp != tp) { \
-          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private( TENSOR1##_data, TENSOR2##_data, TENSOR3##_data, iter) ) \
+          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
           PRAGMA2(ivdep) \
           for (iter = 0; iter < SIZE; iter++) {\
             /*TENSOR1##_data = rp+iter;*/\
@@ -589,7 +589,7 @@
             VCODE                                \
           } \
         } else {\
-          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private( TENSOR1##_data, TENSOR2##_data, TENSOR3##_data, iter) ) \
+          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
           for (iter = 0; iter < SIZE; iter++) {\
             /*TENSOR1##_data = rp+iter;*/\
             /*TENSOR2##_data = tp+iter;*/ \
