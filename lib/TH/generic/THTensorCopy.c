@@ -66,7 +66,7 @@ void THTensor_(copy)(THTensor *tensor, THTensor *src)
 #endif
     } else {
 #ifdef _OPENMP 
-      TH_TENSOR_APPLY2_ADVANCED_INDEX2(srcSize, tensorContig, srcContig, real, tensor, real, src, *tensor_data = *src_data;, rp[iter] = tp[iter];)
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(srcSize, tensorContig, srcContig, real, tensor, real, src, *tensor_data = *src_data;)
 #else
       TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data = *src_data;)
 #endif

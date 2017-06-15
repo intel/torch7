@@ -379,7 +379,7 @@
 \
 }
 
-#define TH_TENSOR_APPLY2_ADVANCED_INDEX2(SIZE, CONTIG1, CONTIG2, TYPE1, TENSOR1, TYPE2, TENSOR2, CODE, VCODE) \
+#define TH_TENSOR_APPLY2_ADVANCED_INDEX2(SIZE, CONTIG1, CONTIG2, TYPE1, TENSOR1, TYPE2, TENSOR2, CODE) \
 {                                                                             \
   int TENSOR1##Dim = TENSOR1->nDimension;                                     \
   int TENSOR2##Dim = TENSOR2->nDimension;                                     \
@@ -425,16 +425,16 @@
           PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
           PRAGMA2(ivdep) \
           for (iter = 0; iter < SIZE; iter++) {\
-            /*TENSOR2##_data = tp+iter;*/\
-            /*TENSOR1##_data = rp+iter;*/\
-            VCODE                                \
+            TENSOR2##_data = tp+iter;\
+            TENSOR1##_data = rp+iter;\
+            CODE                                \
           }\
         } else {\
           PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
           for (iter = 0; iter < SIZE; iter++) {\
-            /*TENSOR2##_data = tp+iter;*/\
-            /*TENSOR1##_data = rp+iter;*/\
-            VCODE                                \
+            TENSOR2##_data = tp+iter;\
+            TENSOR1##_data = rp+iter;\
+            CODE                                \
           }\
         }\
       } else if((TENSOR2##Dim == TENSOR1##Dim) && (TENSOR2##Dim > 2) && CONTIG1){              \
@@ -524,7 +524,7 @@
 \
 }
 
-#define TH_TENSOR_APPLY3_ADVANCED_INDEX2(SIZE, CONTIG1, CONTIG2, CONTIG3, TYPE1, TENSOR1, TYPE2, TENSOR2, TYPE3, TENSOR3, CODE, VCODE) \
+#define TH_TENSOR_APPLY3_ADVANCED_INDEX2(SIZE, CONTIG1, CONTIG2, CONTIG3, TYPE1, TENSOR1, TYPE2, TENSOR2, TYPE3, TENSOR3, CODE) \
 {                                                                             \
   int TENSOR1##Dim = TENSOR1->nDimension;                                     \
   int TENSOR2##Dim = TENSOR2->nDimension;                                     \
@@ -583,18 +583,18 @@
           PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
           PRAGMA2(ivdep) \
           for (iter = 0; iter < SIZE; iter++) {\
-            /*TENSOR1##_data = rp+iter;*/\
-            /*TENSOR2##_data = tp+iter; */\
-            /*TENSOR3##_data = srcp+iter;*/\
-            VCODE                                \
+            TENSOR1##_data = rp+iter;\
+            TENSOR2##_data = tp+iter; \
+            TENSOR3##_data = srcp+iter;\
+            CODE                                \
           } \
         } else {\
           PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
           for (iter = 0; iter < SIZE; iter++) {\
-            /*TENSOR1##_data = rp+iter;*/\
-            /*TENSOR2##_data = tp+iter;*/ \
-            /*TENSOR3##_data = srcp+iter;*/\
-            VCODE                                \
+            TENSOR1##_data = rp+iter;\
+            TENSOR2##_data = tp+iter; \
+            TENSOR3##_data = srcp+iter;\
+            CODE                                \
           } \
         }\
       } else if((TENSOR2##Dim == TENSOR1##Dim) && (TENSOR3##Dim == TENSOR1##Dim) && (TENSOR1##Dim > 2) && CONTIG1 && CONTIG2){              \
