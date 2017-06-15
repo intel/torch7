@@ -680,7 +680,7 @@ void THTensor_(add)(THTensor *r_, THTensor *t, real value)
       TH_TENSOR_APPLY2_CONTIG(real, r_, real, t, THVector_(adds)(r__data, t_data, value, r__len););
     } else {
 #ifdef _OPENMP
-      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data + value;, rp[iter] = tp[iter] + value;)
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data + value;, rp[iter] = tp[iter]+ value;)
 #else
       TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data + value;);
 #endif
@@ -707,7 +707,7 @@ void THTensor_(mul)(THTensor *r_, THTensor *t, real value)
       TH_TENSOR_APPLY2_CONTIG(real, r_, real, t, THVector_(muls)(r__data, t_data, value, r__len););
     } else {
 #ifdef _OPENMP
-      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data * value;, rp[iter] = tp[iter] * value;)
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, r_, real, t, *r__data = *t_data * value;, rp[iter] = tp[iter]* value;)
 #else
       TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data * value;);
 #endif
@@ -3207,7 +3207,7 @@ TENSOR_IMPLEMENT_LOGICAL(ne,!=)
     int r_Contig = THTensor_(isContiguous)(r_)? 1:0;          \
     int tContig = THTensor_(isContiguous)(t)? 1:0;            \
     if( (tSize == r_Size) && (r_Size > TH_OMP_OVERHEAD_THRESHOLD) ){                                 \
-      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, t, real, r_, *r__data = CFUNC(*t_data);, tp[iter] = CFUNC(rp[iter]););                 \
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, t, real, r_, *r__data = CFUNC(*t_data);, rp[iter] = CFUNC(tp[iter]););                 \
     }                                                                                                 \
     else {                                                                                            \
       TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data););                                 \
@@ -3242,7 +3242,7 @@ TENSOR_IMPLEMENT_LOGICAL(ne,!=)
   void THTensor_(NAME)(THTensor *r_, THTensor *t)                                                    \
   {                                                                                                   \
     THTensor_(resizeAs)(r_, t);                                                                       \
-    TH_TENSOR_APPLY2(real, t, real, r_, CODE);                                 \
+    TH_TENSOR_APPLY2(real, t, real, r_, CODE, VCODE);                                 \
   }                                                                                                  \
   
 
@@ -3260,7 +3260,7 @@ TENSOR_IMPLEMENT_LOGICAL(ne,!=)
     int r_Contig = THTensor_(isContiguous)(r_)? 1:0;          \
     int tContig = THTensor_(isContiguous)(t)? 1:0;            \
     if( (tSize == r_Size) && (r_Size > TH_OMP_OVERHEAD_THRESHOLD) ){                                 \
-      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, t, real, r_, *r__data = CFUNC(*t_data, value);, tp[iter] = CFUNC(rp[iter], value););                 \
+      TH_TENSOR_APPLY2_ADVANCED_INDEX2(r_Size, r_Contig, tContig, real, t, real, r_, *r__data = CFUNC(*t_data, value);, rp[iter] = CFUNC(tp[iter], value););                 \
     }                                                                                                 \
     else {                                                                                            \
       TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data, value););                                 \
@@ -3308,14 +3308,14 @@ TENSOR_IMPLEMENT_LOGICAL_SUM(logicalany, ||, 0)
 
 #if defined (TH_REAL_IS_FLOAT)
 #define TH_MATH_NAME(fn) fn##f
-LAB_IMPLEMENT_BASIC_CODE(sigmoid, *r__data = 1.0 / (1.0 + expf(-(*t_data)));, tp[iter] = 1.0 / (1.0 + expf(-rp[iter]));)
-LAB_IMPLEMENT_BASIC_CODE(rsqrt, *r__data = 1.0 / sqrtf(*t_data);, tp[iter] = 1.0 / sqrtf(rp[iter]);)
-LAB_IMPLEMENT_BASIC_CODE(frac, *r__data = *t_data - truncf(*t_data);, tp[iter] = rp[iter] - truncf(rp[iter]);)
+LAB_IMPLEMENT_BASIC_CODE(sigmoid, *r__data = 1.0 / (1.0 + expf(-(*t_data)));, rp[iter] = 1.0 / (1.0 + expf(-tp[iter]));)
+LAB_IMPLEMENT_BASIC_CODE(rsqrt, *r__data = 1.0 / sqrtf(*t_data);, rp[iter] = 1.0 / sqrtf(-tp[iter]);)
+LAB_IMPLEMENT_BASIC_CODE(frac, *r__data = *t_data - truncf(*t_data);, rp[iter] = tp[iter] - truncf(-tp[iter]);)
 #else
 #define TH_MATH_NAME(fn) fn
-LAB_IMPLEMENT_BASIC_CODE(sigmoid, *r__data = 1.0 / (1.0 + exp(-(*t_data)));, tp[iter] = 1.0 / (1.0 + exp(-rp[iter]));)
-LAB_IMPLEMENT_BASIC_CODE(rsqrt, *r__data = 1.0 / sqrt(*t_data);, tp[iter] = 1.0 / sqrt(rp[iter]);)
-LAB_IMPLEMENT_BASIC_CODE(frac, *r__data = *t_data - trunc(*t_data);, tp[iter] = rp[iter] - trunc(rp[iter]);)
+LAB_IMPLEMENT_BASIC_CODE(sigmoid, *r__data = 1.0 / (1.0 + exp(-(*t_data)));, rp[iter] = 1.0 / (1.0 + exp(-tp[iter]));)
+LAB_IMPLEMENT_BASIC_CODE(rsqrt, *r__data = 1.0 / sqrt(*t_data);, rp[iter] = 1.0 / sqrt(-tp[iter]);)
+LAB_IMPLEMENT_BASIC_CODE(frac, *r__data = *t_data - trunc(*t_data);, rp[iter] = tp[iter] - trunc(-tp[iter]);)
 #endif
 
 
