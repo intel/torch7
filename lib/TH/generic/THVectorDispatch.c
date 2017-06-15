@@ -42,7 +42,7 @@ static FunctionDescription THVector_(fill_DISPATCHTABLE)[] = {
   FUNCTION_IMPL(THVector_(fill_DEFAULT), SIMDExtension_DEFAULT)
 };
 void THVector_(fill)(real *x, const real c, const ptrdiff_t n) {
-#if defined(FORCE_AVX512)
+#if defined(FORCE_AVX512) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
   THVector_(fill_AVX512)(x, c, n);
 #else
   THVector_(fill_DISPATCHPTR)(x, c, n);
@@ -79,7 +79,7 @@ static FunctionDescription THVector_(cadd_DISPATCHTABLE)[] = {
   FUNCTION_IMPL(THVector_(cadd_DEFAULT), SIMDExtension_DEFAULT)
 };
 void THVector_(cadd)(real *z, const real *x, const real *y, const real c, const ptrdiff_t n) {
-#if defined(FORCE_AVX512)
+#if defined(FORCE_AVX512) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
   THVector_(cadd_AVX512)(z, x, y, c, n);
 #else
   THVector_(cadd_DISPATCHPTR)(z, x, y, c, n);
@@ -118,7 +118,7 @@ static FunctionDescription THVector_(adds_DISPATCHTABLE)[] = {
 };
 // Dispatch stubs that just call the pointers
 TH_API void THVector_(adds)(real *r_, const real *t, const real value, const ptrdiff_t n) {
-#if defined(FORCE_AVX512)
+#if defined(FORCE_AVX512) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
   THVector_(adds_AVX512)(r_, t, value, n);
 #else
   THVector_(adds_DISPATCHPTR)(r_, t, value, n);
@@ -149,7 +149,7 @@ static FunctionDescription THVector_(cmul_DISPATCHTABLE)[] = {
   FUNCTION_IMPL(THVector_(cmul_DEFAULT), SIMDExtension_DEFAULT)
 };
 void THVector_(cmul)(real *z, const real *x, const real *y, const ptrdiff_t n) {
-#if defined(FORCE_AVX512)
+#if defined(FORCE_AVX512) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
   THVector_(cmul_AVX512)(z, x, y, n);
 #else
   THVector_(cmul_DISPATCHPTR)(z, x, y, n);
@@ -186,7 +186,7 @@ static FunctionDescription THVector_(muls_DISPATCHTABLE)[] = {
   FUNCTION_IMPL(THVector_(muls_DEFAULT), SIMDExtension_DEFAULT)
 };
 void THVector_(muls)(real *y, const real *x, const real c, const ptrdiff_t n) {
-#if defined(FORCE_AVX512)
+#if defined(FORCE_AVX512) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
   THVector_(muls_AVX512)(y, x, c, n);
 #else
   THVector_(muls_DISPATCHPTR)(y, x, c, n);
@@ -217,7 +217,7 @@ static FunctionDescription THVector_(cdiv_DISPATCHTABLE)[] = {
   FUNCTION_IMPL(THVector_(cdiv_DEFAULT), SIMDExtension_DEFAULT)
 };
 void THVector_(cdiv)(real *z, const real *x, const real *y, const ptrdiff_t n) {
-#if defined(FORCE_AVX512)
+#if defined(FORCE_AVX512) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
   THVector_(cdiv_AVX512)(z, x, y, n);
 #else
   THVector_(cdiv_DISPATCHPTR)(z, x, y, n);
@@ -254,7 +254,7 @@ static FunctionDescription THVector_(divs_DISPATCHTABLE)[] = {
   FUNCTION_IMPL(THVector_(divs_DEFAULT), SIMDExtension_DEFAULT)
 };
 void THVector_(divs)(real *y, const real *x, const real c, const ptrdiff_t n) {
-#if defined(FORCE_AVX512)
+#if defined(FORCE_AVX512) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
   THVector_(divs_AVX512)(y, x, c, n);
 #else
   THVector_(divs_DISPATCHPTR)(y, x, c, n);
@@ -272,7 +272,7 @@ static FunctionDescription THVector_(copy_DISPATCHTABLE)[] = {
   FUNCTION_IMPL(THVector_(copy_DEFAULT), SIMDExtension_DEFAULT)
 };
 void THVector_(copy)(real *y, const real *x, const ptrdiff_t n) {
-#if defined(FORCE_AVX512)
+#if defined(FORCE_AVX512) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
   THVector_(copy_AVX512)(y, x, n);
 #else
   THVector_(copy_DISPATCHPTR)(y, x, n);
