@@ -104,10 +104,10 @@ if(MKLML_ROOT_DIR)
        ENDIF(${header})
     ENDFOREACH()
 
-    message("MKLML Info" ${MKLML_ROOT_DIR})
-    message("version----" ${MKLML_VERSION_STR} )
-    message("lib----" ${MKLML_LIBRARIES} )
-    message("include----"  ${MKLML_INCLUDE_DIR})
+    message(STATUS "MKLML Info  " ${MKLML_ROOT_DIR})
+    message(STATUS "version     " ${MKLML_VERSION_STR} )
+    message(STATUS "lib         " ${MKLML_LIBRARIES} )
+    message(STATUS "include     " ${MKLML_INCLUDE_DIR})
 endif()
 
 

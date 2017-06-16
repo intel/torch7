@@ -199,8 +199,6 @@ IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   SET(USING_INTEL ON)
 ENDIF()
 
-SET(USING_INTEL OFF)
-
 #######################################################################
 ##### sources section
 ######################################################################
@@ -253,20 +251,22 @@ IF(C_AVX2_FOUND)
 ENDIF(C_AVX2_FOUND)
 
 IF(FORCE_AVX512)
-  SET(CMAKE_C_FLAGS "-DFORCE_AVX512 ${CMAKE_C_FLAGS}")
   IF(MSVC)
     SET_SOURCE_FILES_PROPERTIES(vector/AVX512.c PROPERTIES COMPILE_FLAGS "/Ox /arch:AVX512 ${C_AVX512_FLAGS}")
   ELSE(MSVC)
     IF(USING_INTEL)
+      SET(CMAKE_C_FLAGS "-DFORCE_AVX512 -xMIC-AVX512 ${CMAKE_C_FLAGS}")
       SET_SOURCE_FILES_PROPERTIES(vector/AVX512.c PROPERTIES COMPILE_FLAGS "-O3 -xMIC-AVX512 ${C_AVX512_FLAGS}")
     ELSE(USING_INTEL)
-      SET_SOURCE_FILES_PROPERTIES(vector/AVX512.c PROPERTIES COMPILE_FLAGS "-O3 -xMIC-AVX512 ${C_AVX512_FLAGS}")
+      SET(CMAKE_C_FLAGS "-DFORCE_AVX512 -march=skylake ${CMAKE_C_FLAGS}")
+      SET_SOURCE_FILES_PROPERTIES(vector/AVX512.c PROPERTIES COMPILE_FLAGS "-O3 -march=skylake ${C_AVX512_FLAGS}")
     ENDIF(USING_INTEL)
 
   ENDIF(MSVC)
   SET(simd vector/AVX512.c ${simd})
 ENDIF(FORCE_AVX512)
 
+MESSAGE(STATUS "CMAKE_C_FLAGS:    ${CMAKE_C_FLAGS}")
 SET(hdr
   THGeneral.h THHalf.h THAllocator.h THStorage.h THTensor.h THTensorApply.h THBlas.h THMath.h
   THLapack.h THLogAdd.h THRandom.h THVector.h THAtomic.h )
