@@ -180,7 +180,7 @@
 
 #define THTENSOR_MAX_DIM 100
 #define TH_OMP_OVERHEAD_THRESHOLD_COPY 1000 
-
+#include <x86intrin.h>
 #define TH_TENSOR_APPLY_REDUCTION_ADVANCED_INDEX(TYPE1, TENSOR1, OPERATION, CODE) \
 {                                                                               \
     int TENSOR1##Dim = TENSOR1->nDimension;                                     \
@@ -379,7 +379,7 @@
 \
 }
 
-#define TH_TENSOR_APPLY2_ADVANCED_INDEX2(SIZE, CONTIG1, CONTIG2, TYPE1, TENSOR1, TYPE2, TENSOR2, CODE) \
+#define TH_TENSOR_APPLY2_ADVANCED_INDEX3(SIZE, CONTIG1, CONTIG2, TYPE1, TENSOR1, TYPE2, TENSOR2, CODE) \
 {                                                                             \
   int TENSOR1##Dim = TENSOR1->nDimension;                                     \
   int TENSOR2##Dim = TENSOR2->nDimension;                                     \
@@ -453,6 +453,176 @@
             TENSOR2##BasicIndex += index*TENSOR2->stride[dim];\
           }\
           index = iter%TENSOR2##Stride[dim];\
+          TENSOR2##BasicIndex += index*TENSOR2->stride[dim];\
+                                                             \
+          TENSOR2##_data = tp+TENSOR2##BasicIndex;\
+          TENSOR1##_data = rp+iter;\
+          CODE                                \
+        }\
+      } else if((TENSOR2##Dim == TENSOR1##Dim) && (TENSOR2##Dim > 2) && CONTIG2){\
+        ptrdiff_t TENSOR2##BasicIndex = 0;\
+        ptrdiff_t TENSOR1##BasicIndex = 0;\
+        TYPE1 *TENSOR1##_data = NULL;\
+        TYPE2 *TENSOR2##_data = NULL;\
+        ptrdiff_t index = 0;\
+        ptrdiff_t iter = 0;\
+        ptrdiff_t dim = 0;\
+                          \
+        PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR1##_data, TENSOR2##_data) )  \
+        for (iter = 0; iter < SIZE; iter++) {\
+          TENSOR1##BasicIndex = 0;\
+\
+          for(dim = 0; dim < TENSOR1##Dim-1; dim++) {\
+            index = (iter%TENSOR1##Stride[dim])/TENSOR1##Stride[dim+1];\
+            TENSOR1##BasicIndex += index*TENSOR1->stride[dim];\
+          }\
+          index = iter%TENSOR1##Stride[dim];\
+          TENSOR1##BasicIndex += index*TENSOR1->stride[dim];\
+          TENSOR2##_data = tp+iter;\
+          TENSOR1##_data = rp+TENSOR1##BasicIndex;\
+          CODE                                \
+        }\
+      } else {\
+        ptrdiff_t TENSOR2##BasicIndex = 0;\
+        ptrdiff_t TENSOR1##BasicIndex = 0;\
+        TYPE1 *TENSOR1##_data = NULL;\
+        TYPE2 *TENSOR2##_data = NULL;\
+        ptrdiff_t index = 0;\
+        ptrdiff_t iter = 0;\
+        ptrdiff_t dim = 0;\
+                          \
+        PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR1##_data, TENSOR2##_data )  )\
+        /*there is no parallelism below this level*/ \
+        for (iter = 0; iter < SIZE; iter++) {\
+          TENSOR2##BasicIndex = 0;\
+          TENSOR1##BasicIndex = 0;\
+\
+          for(dim = 0; dim < TENSOR2##Dim-1; dim++) {\
+            index = (iter%TENSOR2##Stride[dim])/TENSOR2##Stride[dim+1];\
+            TENSOR2##BasicIndex += index*TENSOR2->stride[dim];\
+          }\
+          index = iter%TENSOR2##Stride[dim];\
+          TENSOR2##BasicIndex += index*TENSOR2->stride[dim];\
+\
+          for(dim = 0; dim < TENSOR1##Dim-1; dim++) {\
+            index = (iter%TENSOR1##Stride[dim])/TENSOR1##Stride[dim+1];\
+            TENSOR1##BasicIndex += index*TENSOR1->stride[dim];\
+          }\
+          index = iter%TENSOR1##Stride[dim];\
+          TENSOR1##BasicIndex += index*TENSOR1->stride[dim];\
+          TENSOR2##_data = tp+TENSOR2##BasicIndex;\
+          TENSOR1##_data = rp+TENSOR1##BasicIndex;\
+          CODE                                \
+        }\
+      }\
+    } else {\
+      TH_TENSOR_APPLY2(TYPE1, TENSOR1, TYPE2, TENSOR2, CODE)\
+    }\
+  } else {\
+    TH_TENSOR_APPLY2(TYPE1, TENSOR1, TYPE2, TENSOR2, CODE)\
+  }\
+\
+}
+
+#define TH_TENSOR_APPLY2_ADVANCED_INDEX2(SIZE, CONTIG1, CONTIG2, TYPE1, TENSOR1, TYPE2, TENSOR2, CODE) \
+{                                                                             \
+  int TENSOR1##Dim = TENSOR1->nDimension;                                     \
+  int TENSOR2##Dim = TENSOR2->nDimension;                                     \
+  /* size not equal */                                                        \
+  int omp_flag = omp_in_parallel();                                           \
+  if(0 == omp_flag){                                         \
+    int TENSOR2##StrideContg = 1;                                             \
+    int TENSOR1##StrideContg = 1;                                             \
+    /* all strides below are for advanced searching index*/                   \
+    ptrdiff_t TENSOR2##Stride[THTENSOR_MAX_DIM] = {0};                        \
+    ptrdiff_t TENSOR1##Stride[THTENSOR_MAX_DIM] = {0};                        \
+                                                                              \
+    ptrdiff_t strideSomeDim = 1;                                              \
+    int dim;                                                                  \
+    for (dim = TENSOR2##Dim; dim > 0; dim--){                                 \
+      if(0 == TENSOR2->stride[dim]) {                                         \
+        TENSOR2##StrideContg = 0;                                             \
+        break;                                               \
+      }                                                                        \
+      strideSomeDim *= TENSOR2->size[dim-1];                                  \
+      TENSOR2##Stride[dim-1] = strideSomeDim;                                 \
+    }                                                                         \
+                                                                              \
+    strideSomeDim = 1;                                                        \
+    for (dim = TENSOR1##Dim; dim > 0; dim--){                                 \
+      if(0 == TENSOR1->stride[dim])  {                                         \
+        TENSOR1##StrideContg = 0;                                              \
+        break;                                                                \
+      }                                                                       \
+      strideSomeDim *= TENSOR1->size[dim-1];                                  \
+      TENSOR1##Stride[dim-1] = strideSomeDim;                                 \
+    }                                                                         \
+                                                                              \
+    if((TENSOR2##StrideContg != 0) && (TENSOR1##StrideContg != 0) ){          \
+      /* for adveanced searching index*/                                       \
+      TYPE2 *tp = THTensor_(data)(TENSOR2);                                    \
+      TYPE1 *rp = THTensor_(data)(TENSOR1);                                    \
+      if(CONTIG1 && CONTIG2){                                    \
+        TYPE1 *TENSOR1##_data = NULL;\
+        TYPE2 *TENSOR2##_data = NULL;\
+        ptrdiff_t iter = 0;\
+        if(tp != rp) { \
+          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
+          PRAGMA2(ivdep) \
+          for (iter = 0; iter < SIZE; iter++) {\
+            TENSOR2##_data = tp+iter;\
+            TENSOR1##_data = rp+iter;\
+            CODE                                \
+          }\
+        } else {\
+          PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) )\
+          for (iter = 0; iter < SIZE; iter++) {\
+            TENSOR2##_data = tp+iter;\
+            TENSOR1##_data = rp+iter;\
+            CODE                                \
+          }\
+        }\
+      } else if((TENSOR2##Dim == TENSOR1##Dim) && (TENSOR2##Dim > 2) && CONTIG1){              \
+        ptrdiff_t TENSOR2##BasicIndex = 0;\
+        TYPE1 *TENSOR1##_data = NULL;\
+        TYPE2 *TENSOR2##_data = NULL;\
+        ptrdiff_t index = 0;\
+        ptrdiff_t iter = 0;\
+        ptrdiff_t dim = 0;\
+                          \
+        PRAGMA2( omp parallel for if (SIZE > TH_OMP_OVERHEAD_THRESHOLD_COPY) private(TENSOR1##_data, TENSOR2##_data) )  \
+        for (iter=0; iter<=((SIZE)-8); iter+=8) { \
+          ptrdiff_t TENSOR2##BasicIndexTemp[8] = {0}; \
+          __m512i ZMM0 = _mm512_set_epi64(0, 0, 0, 0, 0, 0, 0, 0);  \
+          __m512i ZMM1 = _mm512_set_epi64(iter, iter+1, iter+2, iter+3, iter+4, iter+5, iter+6, iter+7);  \
+          for(dim = 0; dim < TENSOR2##Dim-1; dim++) {\
+            __m512i ZMM2 = _mm512_set_epi64(TENSOR2##Stride[dim+1], TENSOR2##Stride[dim+1], TENSOR2##Stride[dim+1], TENSOR2##Stride[dim+1], TENSOR2##Stride[dim+1], TENSOR2##Stride[dim+1], TENSOR2##Stride[dim+1], TENSOR2##Stride[dim+1]);  \
+            __m512i ZMM3 = _mm512_div_epi64(ZMM1, ZMM2); \
+            ZMM1 = _mm512_rem_epi64(ZMM1, ZMM2); \
+            ZMM2 = _mm512_set_epi64(TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim]);  \
+            ZMM2 = _mm512_mullox_epi64(ZMM3, ZMM2); \
+            ZMM0 = _mm512_add_epi64(ZMM0, ZMM2); \
+                       \
+          }\
+          __m512i ZMM2 = _mm512_set_epi64(TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim], TENSOR2->stride[dim]);  \
+          ZMM2 = _mm512_mullox_epi64(ZMM2, ZMM1); \
+          ZMM0 = _mm512_add_epi64(ZMM0, ZMM2);\
+          _mm512_storeu_si512(TENSOR2##BasicIndexTemp, ZMM0);\
+          ptrdiff_t opIdx = 0; \
+          for(; opIdx < 8; opIdx++){ \
+            TENSOR2##_data = tp+TENSOR2##BasicIndexTemp[opIdx];\
+            TENSOR1##_data = rp+iter+opIdx;\
+            CODE \
+          }\
+        }\
+        ptrdiff_t off = (SIZE) - ((SIZE)%8); \
+        for (iter=off; iter<(SIZE); iter++) { \
+          TENSOR2##BasicIndex = 0;\
+          index = iter;\
+          for(dim = 0; dim < TENSOR2##Dim-1; dim++) {\
+            TENSOR2##BasicIndex += index/TENSOR2##Stride[dim+1]*TENSOR2->stride[dim];\
+            index = index%TENSOR2##Stride[dim+1];\
+          }\
           TENSOR2##BasicIndex += index*TENSOR2->stride[dim];\
                                                              \
           TENSOR2##_data = tp+TENSOR2##BasicIndex;\
