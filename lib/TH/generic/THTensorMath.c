@@ -3491,6 +3491,40 @@ void THTensor_(norm)(THTensor *r_, THTensor *t, real value, int dimension, int k
 accreal THTensor_(normall)(THTensor *tensor, real value)
 {
   accreal sum = 0;
+#ifdef _OPENMP
+  if(value == 0) {
+    TH_TENSOR_APPLY_REDUCTION_ADVANCED_INDEX(real, tensor, +:sum, sum += *tensor_data != 0.0;);
+    return sum;
+  } else if(value == 1) {
+    TH_TENSOR_APPLY_REDUCTION_ADVANCED_INDEX(real, tensor, +:sum, sum += TH_MATH_NAME(fabs)(*tensor_data););
+    return sum;
+  } else if(value == 2) {
+    TH_TENSOR_APPLY_REDUCTION_ADVANCED_INDEX(real, tensor, +:sum, accreal z = *tensor_data; sum += z*z;);
+    return sqrt(sum);
+  } else {
+    TH_TENSOR_APPLY_REDUCTION_ADVANCED_INDEX(real, tensor, +:sum, sum += TH_MATH_NAME(pow)(TH_MATH_NAME(fabs)(*tensor_data), value););
+    return TH_MATH_NAME(pow)(sum, 1.0/value);
+  }
+#else
+  if(value == 0) {
+    TH_TENSOR_APPLY(real, tensor, sum += *tensor_data != 0.0;);
+    return sum;
+  } else if(value == 1) {
+    TH_TENSOR_APPLY(real, tensor, sum += TH_MATH_NAME(fabs)(*tensor_data););
+    return sum;
+  } else if(value == 2) {
+    TH_TENSOR_APPLY(real, tensor, accreal z = *tensor_data; sum += z*z;);
+    return sqrt(sum);
+  } else {
+    TH_TENSOR_APPLY(real, tensor, sum += TH_MATH_NAME(pow)(TH_MATH_NAME(fabs)(*tensor_data), value););
+    return TH_MATH_NAME(pow)(sum, 1.0/value);
+  }
+#endif
+
+}
+accreal THTensor_(normall2)(THTensor *tensor, real value)
+{
+  accreal sum = 0;
   if(value == 0) {
     TH_TENSOR_APPLY(real, tensor, sum += *tensor_data != 0.0;);
     return sum;
